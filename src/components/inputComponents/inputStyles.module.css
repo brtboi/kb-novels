@@ -1,0 +1,73 @@
+.InputBody {
+    width: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    
+}
+
+.InputCategory {
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.InputRow {
+    display: flex;
+}
+
+.Label {
+    margin: var(--marginSize);
+    width: 12rem;
+    
+    text-align: right;
+}
+
+.Input {
+    margin: var(--marginSize);
+    width: 25rem;
+    background-color: transparent;
+    outline: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+}
+
+.Input.correct {
+    color: lightGreen;
+}
+
+.Input.incorrect {
+    color: tomato;
+}
+
+@keyframes shake {
+    0%, 100% {transform: translateX(0);}
+    25%, 75% {transform: translateX(-5px);}
+    50% {transform: translateX(5px);}
+}
+
+.shake {
+    animation: shake 0.3s ease-in-out;
+}
+
+.Answer {
+    margin: var(--marginSize);
+    width: 25rem;
+}
+
+.hidden {
+    display: none;
+}
+
+/* #caret {
+    position: fixed;
+    top: 10%;
+    left: 20%;
+    height: 1.25rem;
+    width: 2px;
+
+    background-color: var(--primaryColor);
+
+    transition: top 70ms cubic-bezier(.2,.77,.57,1.16), left 70ms cubic-bezier(.2,.77,.57,1.16);
+} */
