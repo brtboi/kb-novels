@@ -1,6 +1,5 @@
 import React, { MutableRefObject, useRef, useState } from "react";
 import classNames from "classnames";
-//import { States } from '../types/types.ts'
 import styles from "./inputStyles.module.css";
 
 interface Props {

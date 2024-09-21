@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import "./global.css";
 import { CARDSContext } from "./entity/contexts.ts";
 import { Card } from "./entity/types.ts";
 import InputBody from "./components/inputComponents/InputBody.tsx";
-import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { db } from "./firebase/firebase.ts";
 
 export default function App() {

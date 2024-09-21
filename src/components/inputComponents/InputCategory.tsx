@@ -1,4 +1,4 @@
-import { MutableRefObject } from "react";
+import React, { MutableRefObject } from "react";
 import { CardRows, } from "../../entity/types.ts";
 import InputRow from "./InputRow.tsx";
 
@@ -13,13 +13,14 @@ export default function InputCategory({ category, rows, inputRowRefs }: Props) {
 
     return (
         <>
-            {Object.entries(rows).map(([label, answer]) => {
+            {Object.entries(rows).map(([label, answer], index) => {
                 return (
                     <InputRow
                         category={category}
                         label={label}
                         answer={answer}
                         inputRowRefs={inputRowRefs}
+                        key={`Input Row ${label} ${answer} ${index}`}
                     />
                 );
             })}
