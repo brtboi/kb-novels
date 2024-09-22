@@ -13,3 +13,9 @@ export type CardRows = {
 export type Card = {
     [key: string]: CardRows;
 };
+
+export type Deck = {
+    id: string;
+    name: string;
+    CARDSArr: Card[]
+}

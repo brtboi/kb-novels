@@ -41,7 +41,7 @@ export default function InputRow({
         <div
             className={styles.InputRow}
             data-category={category}
-            data-inputRef={inputRef.current}
+            data-input-ref={inputRef.current}
             ref={(el) => {
                 if (el) inputRowRefs.current.add(el);
             }}

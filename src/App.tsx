@@ -1,43 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "./global.css";
-import { CARDSContext } from "./entity/contexts.ts";
-import { Card } from "./entity/types.ts";
-import InputBody from "./components/inputComponents/InputBody.tsx";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "./firebase/firebase.ts";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import HomePage from "./components/HomePage";
+import DeckPage from "./components/inputComponents/DeckPage";
+import Header from "./components/Header";
 
 export default function App() {
-    const [CARDSArr, setCARDSArr] = useState<Card[]>([]);
-    const [CARDSIndex, setCARDSIndex] = useState<number>(0);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-
-    useEffect(() => {
-        const fetchCARDSArr = async () => {
-            try {
-                const docSnap = await getDoc(
-                    doc(db, "sets/6GoiEejJKiekdOlYxCHP")
-                );
-                setCARDSArr(docSnap.data()?.CARDSArr);
-                setIsLoading(false);
-            } catch (e) {
-                console.error("Error fetching CARDS", e);
-            }
-        };
-
-        fetchCARDSArr();
-    }, []);
-
     return (
-        <>
-            {isLoading ? (
-                <p>LOADING...</p>
-            ) : (
-                <CARDSContext.Provider
-                    value={{ CARDSArr, CARDSIndex, setCARDSIndex }}
-                >
-                    <InputBody />
-                </CARDSContext.Provider>
-            )}
-        </>
+        <Router>
+            <Routes>
+                <Route path="/" element={<Header />}>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/deck/:id" element={<DeckPage />} />
+                </Route>
+            </Routes>
+        </Router>
     );
 }

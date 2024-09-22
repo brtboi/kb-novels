@@ -1,0 +1,8 @@
+.DeckLink {
+    width: 100%;
+    color: inherit;
+}
+
+.DeckLink:hover {
+    background-color: lightgray;
+}
