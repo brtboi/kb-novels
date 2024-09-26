@@ -20,7 +20,7 @@ export default function SetPage() {
                 const docSnapshot = await getDoc(
                     doc(db, `decks/${id}`)
                 );
-                setCARDSArr(docSnapshot.data()?.CARDSArr);
+                setCARDSArr(JSON.parse(docSnapshot.data()?.CARDSArr));
                 setIsLoading(false);
             } catch (e) {
                 console.error("Error fetching CARDS", e);

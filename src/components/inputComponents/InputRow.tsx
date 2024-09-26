@@ -1,22 +1,32 @@
-import React, { MutableRefObject, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import classNames from "classnames";
 import styles from "./inputStyles.module.css";
+import { InputContext } from "../../entity/contexts";
+import { InputNode, STATES } from "../../entity/types";
 
 interface Props {
     category: string;
     label: string;
     answer: string[] | number[];
-    inputRowRefs: MutableRefObject<Set<HTMLDivElement>>;
 }
 
-export default function InputRow({
-    category,
-    label,
-    answer,
-    inputRowRefs,
-}: Props) {
+export default function InputRow({ category, label, answer }: Props) {
+    const { inputNodeListRef } = useContext(InputContext)!;
+    const isFirstMount = useRef<boolean>(true);
+
     const inputRef = useRef<HTMLInputElement>(null);
+    const [thisInputNode, setThisInputNode] = useState<InputNode | null>(null);
     const [isInputCorrect, setIsInputCorrect] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (isFirstMount) {
+            const inputNodeTemp = new InputNode(inputRef, STATES.ASK);
+            setThisInputNode(inputNodeTemp);
+            inputNodeListRef.current.add(inputNodeTemp);
+        }
+
+        isFirstMount.current = false;
+    }, []);
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         const value = event.currentTarget.value;
@@ -24,12 +34,13 @@ export default function InputRow({
         if (event.key === "Enter") {
             if (
                 answer.some(
-                    (e) =>
+                    (e: string | number) =>
                         e.toString().toLocaleUpperCase() ===
                         value.toLocaleUpperCase()
                 )
             ) {
                 setIsInputCorrect(true);
+                thisInputNode?.step(1);
             } else {
                 setIsInputCorrect(false);
                 event.currentTarget.select();
@@ -42,9 +53,6 @@ export default function InputRow({
             className={styles.InputRow}
             data-category={category}
             data-input-ref={inputRef.current}
-            ref={(el) => {
-                if (el) inputRowRefs.current.add(el);
-            }}
         >
             <label className={styles.Label}>{`${label}:`}</label>
             <input
