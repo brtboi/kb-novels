@@ -71,7 +71,7 @@ export class InputNode {
         }
 
         if (this === start) {
-            console.log("next book");
+            this.parentList.getNextCard();
             return;
         }
 
@@ -87,12 +87,14 @@ export class InputNodeList {
     head: InputNode | null;
     tail: InputNode | null;
     catStates: Record<string, boolean[]>;
+    getNextCard: () => void;
     length: number;
     arr: InputNode[];
 
-    constructor() {
+    constructor(getNextCard: () => void) {
         this.head = this.tail = null;
         this.catStates = {};
+        this.getNextCard = getNextCard;
         this.length = 0;
         this.arr = [];
     }

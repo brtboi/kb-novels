@@ -1,13 +1,11 @@
 import { createContext } from "react";
-import { Card, InputNodeList } from "./types.ts";
+import { InputNodeList } from "./types.ts";
 
-interface CARDSContextType {
-    CARDSArr: Card[];
-    CARDSIndex: number;
-    setCARDSIndex: React.Dispatch<React.SetStateAction<number>>;
-}
+// interface CARDSContextType {
+//     CARDSArr: Card[];
+// }
 
-export const CARDSContext = createContext<CARDSContextType | null>(null);
+// export const CARDSContext = createContext<CARDSContextType | null>(null);
 
 interface InputContextType {
     inputNodeListRef: React.MutableRefObject<InputNodeList>;

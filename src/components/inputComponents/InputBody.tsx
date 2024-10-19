@@ -1,21 +1,26 @@
-import React, { useContext, useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Card, InputNodeList } from "../../entity/types.ts";
-import { CARDSContext, InputContext } from "../../entity/contexts.ts";
+import { InputContext } from "../../entity/contexts.ts";
 import InputCategory from "./InputCategory.tsx";
 
-export default function InputBody() {
-    const { CARDSArr, CARDSIndex } = useContext(CARDSContext)!;
+interface Props {
+    CARDSArr: Card[];
+}
+
+export default function InputBody({ CARDSArr }: Props) {
+    const [CARDSIndex, setCARDSIndex] = useState<number>(0);
+
     const currentCard: Card = CARDSArr[CARDSIndex];
 
-    const inputNodeListRef = useRef<InputNodeList>(new InputNodeList());
+    const getNextCard = () => {
+        setCARDSIndex((prev) => prev + 1);
+    };
+
+    const inputNodeListRef = useRef<InputNodeList>(new InputNodeList(getNextCard));
 
     return (
         <>
-            <InputContext.Provider
-                value={{
-                    inputNodeListRef,
-                }}
-            >
+            <InputContext.Provider value={{ inputNodeListRef }}>
                 {Object.entries(currentCard).map(([category, rows], index) => (
                     <InputCategory
                         category={category}

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { CARDSContext } from "../../entity/contexts.ts";
 import { Card } from "../../entity/types.ts";
 import InputBody from "./InputBody.tsx";
 import { doc, getDoc } from "firebase/firestore";
@@ -10,7 +9,6 @@ export default function SetPage() {
     const { deckId } = useParams<{ deckId: string }>();
 
     const [CARDSArr, setCARDSArr] = useState<Card[]>([]);
-    const [CARDSIndex, setCARDSIndex] = useState<number>(0);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
@@ -28,16 +26,6 @@ export default function SetPage() {
     }, [deckId]);
 
     return (
-        <>
-            {isLoading ? (
-                <p>LOADING...</p>
-            ) : (
-                <CARDSContext.Provider
-                    value={{ CARDSArr, CARDSIndex, setCARDSIndex }}
-                >
-                    <InputBody />
-                </CARDSContext.Provider>
-            )}
-        </>
+        <>{isLoading ? <p>LOADING...</p> : <InputBody CARDSArr={CARDSArr} />}</>
     );
 }
