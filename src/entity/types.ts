@@ -22,14 +22,34 @@ export type Deck = {
 
 export class InputNode {
     inputRef: React.RefObject<HTMLInputElement>;
-    state: STATES;
+    _state: STATES;
+    onStateChange: () => void = () => {};
     prevNode: InputNode;
     nextNode: InputNode;
+    parentList: InputNodeList;
 
-    constructor(inputRef: React.RefObject<HTMLInputElement>, state: STATES) {
+    constructor(
+        inputRef: React.RefObject<HTMLInputElement>,
+        state: STATES,
+        parentList: InputNodeList
+    ) {
         this.inputRef = inputRef;
-        this.state = state;
+        this._state = state;
         this.prevNode = this.nextNode = this;
+        this.parentList = parentList;
+    }
+
+    get state() {
+        return this._state;
+    }
+
+    set state(value: STATES) {
+        this._state = value;
+        this.onStateChange();
+    }
+
+    setOnStateChange(callback: () => void) {
+        this.onStateChange = callback;
     }
 
     step(step: 1 | -1): void {
@@ -66,11 +86,15 @@ export class InputNode {
 export class InputNodeList {
     head: InputNode | null;
     tail: InputNode | null;
+    catStates: Record<string, boolean[]>;
     length: number;
+    arr: InputNode[];
 
     constructor() {
         this.head = this.tail = null;
+        this.catStates = {};
         this.length = 0;
+        this.arr = [];
     }
 
     get isEmpty(): boolean {
@@ -80,6 +104,8 @@ export class InputNodeList {
     add(InputNode: InputNode) {
         if (this.isEmpty) {
             this.head = this.tail = InputNode;
+            this.head.prevNode = this.tail;
+            this.head.nextNode = this.tail;
         } else {
             this.tail!.nextNode = InputNode;
             InputNode.prevNode = this.tail!;
@@ -89,7 +115,16 @@ export class InputNodeList {
 
             this.tail = InputNode;
         }
-
+        this.arr.push(InputNode);
         this.length++;
+    }
+
+    toString() {
+        return this.arr.map(
+            (node, index) =>
+                `${index}. ${node.inputRef.current!.value || "EMPTY"} | ${
+                    node.state
+                }`
+        );
     }
 }

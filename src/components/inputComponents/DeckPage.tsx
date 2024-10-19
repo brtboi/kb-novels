@@ -7,7 +7,6 @@ import { db } from "../../firebase/firebase.ts";
 import { useParams } from "react-router-dom";
 
 export default function SetPage() {
-
     const { id } = useParams<{ id: string }>();
 
     const [CARDSArr, setCARDSArr] = useState<Card[]>([]);
@@ -17,9 +16,7 @@ export default function SetPage() {
     useEffect(() => {
         const fetchCARDSArr = async () => {
             try {
-                const docSnapshot = await getDoc(
-                    doc(db, `decks/${id}`)
-                );
+                const docSnapshot = await getDoc(doc(db, `decks/${id}`));
                 setCARDSArr(JSON.parse(docSnapshot.data()?.CARDSArr));
                 setIsLoading(false);
             } catch (e) {
