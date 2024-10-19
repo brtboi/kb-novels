@@ -53,8 +53,12 @@ export default function InputRow({ category, label, answer }: Props) {
                     )
                 ) {
                     thisInputNode!.state = STATES.CORRECT;
-
-                    thisInputNode?.step(1);
+                    thisInputNode!.step(1);
+                } else if (
+                    value === "idk"
+                ) {
+                    thisInputNode!.state = STATES.INCORRECT;
+                    thisInputNode!.step(1);
                 } else {
                     event.currentTarget.select();
                 }
@@ -76,6 +80,8 @@ export default function InputRow({ category, label, answer }: Props) {
             <input
                 className={classNames(styles.Input, {
                     [styles.correct]: state === STATES.CORRECT,
+                    [styles.incorrect]: state === STATES.INCORRECT,
+                    [styles.shake]: state === STATES.INCORRECT,
                 })}
                 type="text"
                 autoComplete="off"
@@ -84,6 +90,7 @@ export default function InputRow({ category, label, answer }: Props) {
                 ref={inputRef}
             />
             <p className={styles.Answer}>{answer}</p>
+            <button>{thisInputNode?.state}</button>
         </div>
     );
 }
