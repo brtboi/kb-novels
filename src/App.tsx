@@ -11,7 +11,7 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<Header />}>
                     <Route path="/" element={<HomePage />} />
-                    <Route path="/deck/:id" element={<DeckPage />} />
+                    <Route path="/deck/:deckId" element={<DeckPage />} />
                 </Route>
             </Routes>
         </Router>
