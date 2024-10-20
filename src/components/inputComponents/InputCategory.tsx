@@ -8,7 +8,6 @@ interface Props {
 }
 
 export default function InputCategory({ category, rows }: Props) {
-    //const { CARDSArr, CARDSIndex, setCARDSIndex } = useContext(CARDSContext);
 
     return (
         <>

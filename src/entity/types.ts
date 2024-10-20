@@ -6,18 +6,46 @@ export enum STATES {
     INCORRECT = "incorrect",
 }
 
-export type CardRows = {
-    [key: string]: number[] | string[];
-};
+// export type CardRows = {
+//     [key: string]: number[] | string[];
+// };
+
+// export type Card = {
+//     [key: string]: CardRows;
+// };
+
+export type CardRow = {
+    label: string;
+    answer: string;
+    _type: "string" | "number";
+    _isCaseSensitive: boolean;
+}
+
+export type CardCategory = {
+    _dependencies: string[];
+    _isOrdered: boolean;
+    _isSequential: boolean;
+    rows: CardRow[];
+}
 
 export type Card = {
-    [key: string]: CardRows;
-};
+    [key: string]: {
+        _dependencies: string[];
+        _isOrdered: boolean;
+        _isSequential: boolean;
+        rows: {
+            label: string;
+            answer: string;
+            _type: "string" | "number";
+            _isCaseSensitive: boolean;
+        }[];
+    }
+}
 
 export type Deck = {
     id: string;
     name: string;
-    CARDSArr: Card[];
+    cards: Card[];
 };
 
 export class InputNode {

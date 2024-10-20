@@ -36,15 +36,20 @@ export default function HomePage() {
             {isLoading ? (
                 <p>Loading...</p>
             ) : (
-                allDecks.map((deck) => (
-                    <Link
-                        className={styles.DeckLink}
-                        to={`/deck/${deck.id}`}
-                        key={deck.id}
-                    >
-                        <p>{`${deck.id}: ${deck.name}`}</p>
+                <>
+                    {allDecks.map((deck) => (
+                        <Link
+                            className={styles.DeckLink}
+                            to={`/deck/${deck.id}`}
+                            key={deck.id}
+                        >
+                            <p>{`${deck.id}: ${deck.name}`}</p>
+                        </Link>
+                    ))}
+                    <Link className={styles.DeckLink} to={`/edit/new`}>
+                        new deck
                     </Link>
-                ))
+                </>
             )}
         </>
     );

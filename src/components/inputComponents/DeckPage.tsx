@@ -8,24 +8,24 @@ import { useParams } from "react-router-dom";
 export default function SetPage() {
     const { deckId } = useParams<{ deckId: string }>();
 
-    const [CARDSArr, setCARDSArr] = useState<Card[]>([]);
+    const [cards, setCards] = useState<Card[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        const fetchCARDSArr = async () => {
+        const fetchCards = async () => {
             try {
                 const docSnapshot = await getDoc(doc(db, `decks/${deckId}`));
-                setCARDSArr(JSON.parse(docSnapshot.data()?.CARDSArr));
+                setCards(JSON.parse(docSnapshot.data()?.cards));
                 setIsLoading(false);
             } catch (e) {
                 console.error("Error fetching CARDS", e);
             }
         };
 
-        fetchCARDSArr();
+        fetchCards();
     }, [deckId]);
 
     return (
-        <>{isLoading ? <p>LOADING...</p> : <InputBody CARDSArr={CARDSArr} />}</>
+        <>{isLoading ? <p>LOADING...</p> : <InputBody cards={cards} />}</>
     );
 }

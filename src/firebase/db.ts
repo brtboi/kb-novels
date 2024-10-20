@@ -22,7 +22,7 @@ export const deckById = async (deckId: string): Promise<Deck> => {
     return {
         id: deckId,
         name: data.name,
-        CARDSArr: data.CARDSArr,
+        cards: data.cards,
     };
 };
 

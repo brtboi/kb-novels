@@ -4,13 +4,13 @@ import { InputContext } from "../../entity/contexts.ts";
 import InputCategory from "./InputCategory.tsx";
 
 interface Props {
-    CARDSArr: Card[];
+    cards: Card[];
 }
 
-export default function InputBody({ CARDSArr }: Props) {
+export default function InputBody({ cards }: Props) {
     const [CARDSIndex, setCARDSIndex] = useState<number>(0);
 
-    const currentCard: Card = CARDSArr[CARDSIndex];
+    const currentCard: Card = cards[CARDSIndex];
 
     const getNextCard = () => {
         setCARDSIndex((prev) => prev + 1);
