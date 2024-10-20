@@ -1,9 +1,14 @@
-export enum STATES {
+export enum STATE {
     ASK = "ask",
     SHOW = "show",
     HIDE = "hide",
     CORRECT = "correct",
     INCORRECT = "incorrect",
+}
+
+export enum ROWTYPE {
+    STRING = "string",
+    NUMBER = "number",
 }
 
 // export type CardRows = {
@@ -14,19 +19,35 @@ export enum STATES {
 //     [key: string]: CardRows;
 // };
 
+export type TemplateCategory = {
+    _dependencies: string[];
+    _isOrdered: boolean;
+    _isSequential: boolean;
+    name: string;
+    rows: {
+        label: string;
+        _type: ROWTYPE;
+        _isCaseSensitive: boolean;
+    }[];
+};
+
+export type TemplateCard = {
+    categories: TemplateCategory[];
+};
+
 export type CardRow = {
     label: string;
     answer: string;
-    _type: "string" | "number";
+    _type: ROWTYPE;
     _isCaseSensitive: boolean;
-}
+};
 
 export type CardCategory = {
     _dependencies: string[];
     _isOrdered: boolean;
     _isSequential: boolean;
     rows: CardRow[];
-}
+};
 
 export type Card = {
     [key: string]: {
@@ -39,8 +60,8 @@ export type Card = {
             _type: "string" | "number";
             _isCaseSensitive: boolean;
         }[];
-    }
-}
+    };
+};
 
 export type Deck = {
     id: string;
@@ -50,7 +71,7 @@ export type Deck = {
 
 export class InputNode {
     inputRef: React.RefObject<HTMLInputElement>;
-    _state: STATES;
+    _state: STATE;
     onStateChange: () => void = () => {};
     prevNode: InputNode;
     nextNode: InputNode;
@@ -58,7 +79,7 @@ export class InputNode {
 
     constructor(
         inputRef: React.RefObject<HTMLInputElement>,
-        state: STATES,
+        state: STATE,
         parentList: InputNodeList
     ) {
         this.inputRef = inputRef;
@@ -71,7 +92,7 @@ export class InputNode {
         return this._state;
     }
 
-    set state(value: STATES) {
+    set state(value: STATE) {
         this._state = value;
         this.onStateChange();
     }
@@ -90,7 +111,7 @@ export class InputNode {
     }
 
     step_next(step: 1 | -1, start: InputNode): void {
-        if (this.state === STATES.ASK) {
+        if (this.state === STATE.ASK) {
             if (this.inputRef.current === null)
                 throw new Error("inputRef is null");
 

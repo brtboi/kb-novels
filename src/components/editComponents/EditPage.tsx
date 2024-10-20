@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Card } from "../../entity/types";
+import { Card, TemplateCard } from "../../entity/types";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-import { TemplateCard } from "./editTypes";
 import EditBody from "./EditBody";
 import { EditContext } from "../../entity/contexts";
 

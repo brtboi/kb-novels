@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import classNames from "classnames";
 import styles from "./inputStyles.module.css";
 import { InputContext } from "../../entity/contexts";
-import { InputNode, STATES } from "../../entity/types";
+import { InputNode, STATE } from "../../entity/types";
 
 interface Props {
     category: string;
@@ -16,13 +16,13 @@ export default function InputRow({ category, label, answer }: Props) {
     const inputRef = useRef<HTMLInputElement>(null);
     const [thisInputNode, setThisInputNode] = useState<InputNode | null>(null);
 
-    const [state, setState] = useState<STATES>();
+    const [state, setState] = useState<STATE>();
 
     useEffect(() => {
         if (isFirstMount.current) {
             const inputNodeTemp = new InputNode(
                 inputRef,
-                STATES.ASK,
+                STATE.ASK,
                 inputNodeListRef.current
             );
 
@@ -52,12 +52,10 @@ export default function InputRow({ category, label, answer }: Props) {
                             value.toLocaleUpperCase()
                     )
                 ) {
-                    thisInputNode!.state = STATES.CORRECT;
+                    thisInputNode!.state = STATE.CORRECT;
                     thisInputNode!.step(1);
-                } else if (
-                    value === "idk"
-                ) {
-                    thisInputNode!.state = STATES.INCORRECT;
+                } else if (value === "idk") {
+                    thisInputNode!.state = STATE.INCORRECT;
                     thisInputNode!.step(1);
                 } else {
                     event.currentTarget.select();
@@ -79,9 +77,9 @@ export default function InputRow({ category, label, answer }: Props) {
             <label className={styles.Label}>{`${label}:`}</label>
             <input
                 className={classNames(styles.Input, {
-                    [styles.correct]: state === STATES.CORRECT,
-                    [styles.incorrect]: state === STATES.INCORRECT,
-                    [styles.shake]: state === STATES.INCORRECT,
+                    [styles.correct]: state === STATE.CORRECT,
+                    [styles.incorrect]: state === STATE.INCORRECT,
+                    [styles.shake]: state === STATE.INCORRECT,
                 })}
                 type="text"
                 autoComplete="off"
