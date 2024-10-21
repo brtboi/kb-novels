@@ -1,14 +1,16 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { EditContext } from "../../entity/contexts";
 import EditCardsCard from "./EditCardsCard";
 
 export default function EditCardsBody() {
-    const { templateRef, cardsRef, rerender } = useContext(EditContext)!;
+    const { templateRef, cardsRef } = useContext(EditContext)!;
+
+    const [_, setUpdate] = useState<number>(0)
 
     const handleAddCard = () => {
         cardsRef.current!.push({ ...templateRef.current! });
 
-        rerender();
+        setUpdate((prev) => prev + 1)
     };
 
     return (

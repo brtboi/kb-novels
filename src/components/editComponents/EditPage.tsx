@@ -11,9 +11,6 @@ export default function EditPage() {
     const templateRef = useRef<Card | null>(null);
     const cardsRef = useRef<Card[] | null>(null);
     const [, setUpdate] = useState<number>(0);
-    const rerender = () => {
-        setUpdate((prev) => prev + 1);
-    };
 
     useEffect(() => {
         const fetchCards = async () => {
@@ -33,15 +30,14 @@ export default function EditPage() {
             fetchCards();
         }
 
-        rerender();
+        setUpdate((prev) => prev + 1);
+
     }, [deckId]);
 
     return (
         <>
             {cardsRef.current !== null && templateRef.current !== null ? (
-                <EditContext.Provider
-                    value={{ templateRef, cardsRef, rerender }}
-                >
+                <EditContext.Provider value={{ templateRef, cardsRef }}>
                     <EditBody />
                 </EditContext.Provider>
             ) : (

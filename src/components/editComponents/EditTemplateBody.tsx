@@ -1,9 +1,11 @@
 import EditTemplateCategory from "./EditTemplateCategory";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { EditContext } from "../../entity/contexts";
 
 export default function EditTemplateBody() {
-    const { templateRef, rerender } = useContext(EditContext)!;
+    const { templateRef } = useContext(EditContext)!;
+
+    const [_, setUpdate] = useState<number>(0);
 
     const handleAddCategory = () => {
         templateRef.current!.categories.push({
@@ -14,7 +16,7 @@ export default function EditTemplateBody() {
             rows: [],
         });
 
-        rerender();
+        setUpdate((prev) => prev + 1);
     };
 
     return (
