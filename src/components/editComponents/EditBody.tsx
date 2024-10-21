@@ -1,16 +1,24 @@
 import { useContext } from "react";
-import EditTemplate from "./EditTemplate";
+import EditTemplateBody from "./EditTemplateBody";
 import { useNavigate } from "react-router-dom";
 import { EditContext } from "../../entity/contexts";
+import EditCardsBody from "./EditCardsBody";
 
 export default function EditBody() {
-    const { templateRef } = useContext(EditContext)!;
+    const { templateRef , cardsRef} = useContext(EditContext)!;
     const navigate = useNavigate();
 
     return (
         <>
-            <EditTemplate />
-            <div style={{ width: "10rem",display: "flex", flexDirection: "column" }}>
+            <EditTemplateBody />
+            <EditCardsBody />
+            <div
+                style={{
+                    width: "10rem",
+                    display: "flex",
+                    flexDirection: "column",
+                }}
+            >
                 <button
                     onClick={() => {
                         console.log(templateRef.current);
@@ -18,6 +26,7 @@ export default function EditBody() {
                 >
                     print template
                 </button>
+                <button onClick={() => {console.log(cardsRef.current)}}>print cards</button>
                 <button
                     onClick={() => {
                         navigate(-1);

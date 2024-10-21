@@ -1,7 +1,16 @@
-.TemplateCategory {
+.CardCategory {
     display: flex;
     border: 2px solid var(--fontColor);
     padding: 1rem;
     border-radius: 1rem;
     flex-direction: column;
+}
+
+.Input {
+    background-color: transparent;
+    outline: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
 }

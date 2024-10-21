@@ -9,7 +9,7 @@ export const InputContext = createContext<InputContextType | null>(null);
 
 
 interface EditContextType {
-    templateRef: React.MutableRefObject<TemplateCard | null>
+    templateRef: React.MutableRefObject<Card | null>
     cardsRef: React.MutableRefObject<Card[] | null>
     rerender: () => void;
     

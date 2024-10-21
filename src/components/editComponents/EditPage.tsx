@@ -8,7 +8,7 @@ import { EditContext } from "../../entity/contexts";
 
 export default function EditPage() {
     const { deckId } = useParams<{ deckId: string }>();
-    const templateRef = useRef<TemplateCard | null>(null);
+    const templateRef = useRef<Card | null>(null);
     const cardsRef = useRef<Card[] | null>(null);
     const [, setUpdate] = useState<number>(0);
     const rerender = () => {

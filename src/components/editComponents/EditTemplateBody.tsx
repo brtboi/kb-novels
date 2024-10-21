@@ -2,7 +2,7 @@ import EditTemplateCategory from "./EditTemplateCategory";
 import { useContext } from "react";
 import { EditContext } from "../../entity/contexts";
 
-export default function EditTemplate() {
+export default function EditTemplateBody() {
     const { templateRef, rerender } = useContext(EditContext)!;
 
     const handleAddCategory = () => {

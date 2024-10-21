@@ -46,21 +46,12 @@ export type CardCategory = {
     _dependencies: string[];
     _isOrdered: boolean;
     _isSequential: boolean;
+    name: string;
     rows: CardRow[];
 };
 
 export type Card = {
-    [key: string]: {
-        _dependencies: string[];
-        _isOrdered: boolean;
-        _isSequential: boolean;
-        rows: {
-            label: string;
-            answer: string;
-            _type: "string" | "number";
-            _isCaseSensitive: boolean;
-        }[];
-    };
+    categories: CardCategory[];
 };
 
 export type Deck = {

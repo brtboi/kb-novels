@@ -2,7 +2,7 @@ import classNames from "classnames";
 import styles from "./editStyles.module.css";
 import { useContext, useState } from "react";
 import { EditContext } from "../../entity/contexts";
-import { ROWTYPE, TemplateCategory } from "../../entity/types";
+import { CardCategory, ROWTYPE, TemplateCategory } from "../../entity/types";
 
 interface Props {
     index: number;
@@ -10,7 +10,7 @@ interface Props {
 
 export default function EditTemplateCategory({ index }: Props) {
     const { templateRef } = useContext(EditContext)!;
-    const [category, setCategory] = useState<TemplateCategory>(
+    const [category, setCategory] = useState<CardCategory>(
         templateRef.current!.categories[index]
     );
 
@@ -30,6 +30,7 @@ export default function EditTemplateCategory({ index }: Props) {
         setCategory((prev) => {
             const newRow = {
                 label: `Row_${prev.rows.length}`,
+                answer: "",
                 _type: ROWTYPE.STRING,
                 _isCaseSensitive: false,
             };
@@ -64,27 +65,30 @@ export default function EditTemplateCategory({ index }: Props) {
     };
 
     return (
-        <div className={classNames(styles.TemplateCategory)}>
+        <div className={classNames(styles.CardCategory)}>
             <input
+                className={classNames(styles.Input)}
                 type="text"
                 value={category.name}
                 autoComplete="off"
                 spellCheck="false"
                 onChange={handleCategoryNameChange}
             />
-            <p>{category.name}</p>
-            <p>dependencies: {category._dependencies}</p>
-            <p>isOrdered: {category._isOrdered.toString()}</p>
-            <p>rows:</p>
-            {category.rows.map(({ label, _type, _isCaseSensitive }, rowIndex) => (
-                <input
-                    type="text"
-                    value={category.rows[rowIndex].label}
-                    autoComplete="off"
-                    spellCheck="false"
-                    onChange={(e) => {handleRowChange(e, rowIndex)}}
-                />
-            ))}
+            {category.rows.map(
+                (_, rowIndex) => (
+                    <input
+                        className={classNames(styles.Input)}
+                        type="text"
+                        value={category.rows[rowIndex].label}
+                        autoComplete="off"
+                        spellCheck="false"
+                        onChange={(e) => {
+                            handleRowChange(e, rowIndex);
+                        }}
+                        key={`Cat ${category.name} row ${rowIndex}`}
+                    />
+                )
+            )}
 
             <button onClick={handleAddRow}>Add Row</button>
         </div>
