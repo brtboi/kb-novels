@@ -23,7 +23,7 @@ export default function EditCardsCategory({ cardIndex, categoryIndex }: Props) {
         <div className={classNames(styles.CardCategory)}>
             <p>{category.name}</p>
             {category.rows.map((row, rowIndex) => (
-                <EditCardsRow category={category} rowIndex={rowIndex} key={`cat ${category.name} row ${rowIndex}`}/>
+                <EditCardsRow category={cardsRef.current![cardIndex].categories[categoryIndex]} rowIndex={rowIndex} key={`cat ${category.name} row ${rowIndex}`}/>
             ))}
         </div>
     );

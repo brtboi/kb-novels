@@ -74,8 +74,8 @@ export default function EditTemplateCategory({ index }: Props) {
                 spellCheck="false"
                 onChange={handleCategoryNameChange}
             />
-            {category.rows.map(
-                (_, rowIndex) => (
+            {category.rows.map((_, rowIndex) => (
+                <>
                     <input
                         className={classNames(styles.Input)}
                         type="text"
@@ -87,8 +87,9 @@ export default function EditTemplateCategory({ index }: Props) {
                         }}
                         key={`Cat ${category.name} row ${rowIndex}`}
                     />
-                )
-            )}
+                    <p key={"hello world row" + category.name + rowIndex}>{category.rows[rowIndex].answer || "none"}</p>
+                </>
+            ))}
 
             <button onClick={handleAddRow}>Add Row</button>
         </div>

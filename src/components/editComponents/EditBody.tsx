@@ -5,7 +5,7 @@ import { EditContext } from "../../entity/contexts";
 import EditCardsBody from "./EditCardsBody";
 
 export default function EditBody() {
-    const { templateRef , cardsRef} = useContext(EditContext)!;
+    const { templateRef, cardsRef } = useContext(EditContext)!;
     const navigate = useNavigate();
 
     return (
@@ -26,7 +26,13 @@ export default function EditBody() {
                 >
                     print template
                 </button>
-                <button onClick={() => {console.log(cardsRef.current)}}>print cards</button>
+                <button
+                    onClick={() => {
+                        console.log(cardsRef.current);
+                    }}
+                >
+                    print cards
+                </button>
                 <button
                     onClick={() => {
                         navigate(-1);
