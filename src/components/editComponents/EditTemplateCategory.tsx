@@ -42,6 +42,9 @@ export default function EditTemplateCategory({ index }: Props) {
             templateRef.current!.categories[index] = updatedCategory;
             return updatedCategory;
         });
+
+        console.log("cardReal:", templateRef.current!.categories[index])
+        console.log("cardState", category)
     };
 
     const handleRowChange = (
