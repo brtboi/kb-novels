@@ -60,7 +60,7 @@ export default function EditCategory({
                         handleUpdateRow(rowIndex, newRow);
                     }}
                     isTemplate={isTemplate}
-                    key={rowIndex}
+                    key={`${category.name} | ${rowIndex} | ${row.label}`}
                 />
             ))}
             <button onClick={handleAddRow}>Add Row</button>

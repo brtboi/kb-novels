@@ -46,7 +46,7 @@ export default function EditCard({ card, updateCard, isTemplate }: Props) {
                             handleUpdateCategory(categoryIndex, newCategory);
                         }}
                         isTemplate={isTemplate}
-                        key={`category ${category.name}`}
+                        key={`category ${category.name} | ${categoryIndex}`}
                     />
                 );
             })}

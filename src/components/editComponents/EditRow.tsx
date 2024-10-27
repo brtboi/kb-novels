@@ -24,13 +24,11 @@ export default function Row({ row, updateRow, isTemplate }: RowProps) {
 
     const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newLabel = e.target.value;
-        // updateRow({ ...row, label: newLabel });
         setLabel(newLabel)
     };
 
     const handleAnswerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newAnswer = e.target.value;
-        // updateRow({ ...row, answer: newAnswer });
         setAnswer(newAnswer)
     };
 
