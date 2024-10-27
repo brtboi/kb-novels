@@ -1,16 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Card, TemplateCard } from "../../entity/types";
+import { Card } from "../../entity/types";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-import EditBody from "./EditBody";
-import { EditContext } from "../../entity/contexts";
 import EditCard from "./EditCard";
 
 export default function EditPage() {
     const { deckId } = useParams<{ deckId: string }>();
-    const templateRef = useRef<Card | null>(null);
-    const cardsRef = useRef<Card[] | null>(null);
 
     const [templateCard, setTemplateCard] = useState<Card | null>(null);
     const [cards, setCards] = useState<Card[] | null>(null);
@@ -20,8 +16,6 @@ export default function EditPage() {
         const fetchCards = async () => {
             try {
                 const docSnapshot = await getDoc(doc(db, `decks/${deckId}`));
-                templateRef.current = JSON.parse(docSnapshot.data()?.template);
-                cardsRef.current = JSON.parse(docSnapshot.data()?.cards);
 
                 setTemplateCard(JSON.parse(docSnapshot.data()?.template));
                 setCards(JSON.parse(docSnapshot.data()?.cards));
@@ -31,9 +25,6 @@ export default function EditPage() {
         };
 
         if (deckId === "new") {
-            templateRef.current = { categories: [] };
-            cardsRef.current = [];
-
             setTemplateCard({ categories: [] });
             setCards([]);
         } else {
@@ -47,18 +38,50 @@ export default function EditPage() {
         setTemplateCard(newCard);
     };
 
+    const updateCard = (cardIndex: number, newCard: Card) => {
+        setCards((prev) => {
+            const updatedCards = prev!;
+            updatedCards[cardIndex] = newCard;
+            return updatedCards;
+        });
+    };
+
+    const handleAddCard = (cardIndex: number) => {
+        const newCard: Card = structuredClone(templateCard!);
+        const updatedCards = cards!;
+        updatedCards.splice(cardIndex, 0, newCard);
+        setCards(updatedCards);
+    };
+
+    const addCard = () => {
+        const newCard: Card = structuredClone(templateCard!);
+        setCards((prev) => [...prev!, newCard]);
+    };
+
     return (
         <>
-            {templateCard !== null ? (
+            {templateCard !== null && cards !== null ? (
                 // <EditContext.Provider value={{ templateRef, cardsRef }}>
                 //     {/* <EditBody /> */}
                 // </EditContext.Provider>
-                <div style={{display: "flex", flexDirection: "column"}}>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                    <p>Template:</p>
                     <EditCard
                         card={templateCard}
                         updateCard={updateTemplateCard}
                         isTemplate={true}
                     />
+                    <p>Cards:</p>
+                    {cards.map((card, cardIndex) => (
+                        <EditCard
+                            card={card}
+                            updateCard={(newCard: Card) => {
+                                updateCard(cardIndex, newCard);
+                            }}
+                            isTemplate={false}
+                        />
+                    ))}
+                    <button onClick={addCard}>add Card</button>
                     <button
                         onClick={() => {
                             console.log(templateCard);

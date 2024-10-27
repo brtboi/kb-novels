@@ -1,9 +1,6 @@
-import { useContext, useState } from "react";
-import classNames from "classnames";
-import styles from "./editStyles.module.css";
+import React from "react";
 import { Card, CardCategory } from "../../entity/types";
 import EditCategory from "./EditCategory";
-import { EditContext } from "../../entity/contexts";
 
 interface Props {
     card: Card;

@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import EditTemplateBody from "./EditTemplateBody";
 import { useNavigate } from "react-router-dom";
 import { EditContext } from "../../entity/contexts";

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import classNames from "classnames";
 import styles from "./editStyles.module.css";
 import { CardCategory, CardRow, ROWTYPE } from "../../entity/types";
@@ -25,7 +25,6 @@ export default function EditCategory({
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         const newName = e.target.value;
-        // updateCategory({ ...category, name: newName });
         setCategoryName(newName)
     };
 
