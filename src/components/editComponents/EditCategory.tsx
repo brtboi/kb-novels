@@ -15,6 +15,7 @@ export default function EditCategory({
     updateCategory,
     isTemplate,
 }: Props) {
+    //
     const [categoryName, setCategoryName] = useState<string>(category.name);
 
     const handleCategoryNameOnBlur = () => {
@@ -25,7 +26,7 @@ export default function EditCategory({
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         const newName = e.target.value;
-        setCategoryName(newName)
+        setCategoryName(newName);
     };
 
     const handleAddRow = () => {
@@ -39,7 +40,7 @@ export default function EditCategory({
     };
 
     const handleUpdateRow = (rowIndex: number, newRow: CardRow) => {
-        const updatedRows = [...category.rows];
+        const updatedRows = structuredClone(category.rows);
         updatedRows[rowIndex] = newRow;
         updateCategory({ ...category, rows: updatedRows });
     };

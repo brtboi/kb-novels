@@ -11,30 +11,6 @@ export enum ROWTYPE {
     NUMBER = "number",
 }
 
-// export type CardRows = {
-//     [key: string]: number[] | string[];
-// };
-
-// export type Card = {
-//     [key: string]: CardRows;
-// };
-
-export type TemplateCategory = {
-    _dependencies: string[];
-    _isOrdered: boolean;
-    _isSequential: boolean;
-    name: string;
-    rows: {
-        label: string;
-        _type: ROWTYPE;
-        _isCaseSensitive: boolean;
-    }[];
-};
-
-export type TemplateCard = {
-    categories: TemplateCategory[];
-};
-
 export type CardRow = {
     label: string;
     answer: string;

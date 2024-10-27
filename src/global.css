@@ -21,7 +21,7 @@
     margin: 0px;
     border: none;
     padding: 0px;
-    overflow: hidden;
+    overflow: auto;
     box-sizing: border-box
 }
 
