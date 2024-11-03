@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Card, STATE } from "../../entity/types.ts";
-import InputBody from "./InputBody.tsx";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase.ts";
 import { useParams } from "react-router-dom";
