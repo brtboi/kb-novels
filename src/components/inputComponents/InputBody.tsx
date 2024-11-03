@@ -16,18 +16,14 @@ export default function InputBody({ cards }: Props) {
         setCARDSIndex((prev) => prev + 1);
     };
 
-    const inputNodeListRef = useRef<InputNodeList>(new InputNodeList(getNextCard));
+    const inputNodeListRef = useRef<InputNodeList>(
+        new InputNodeList(getNextCard)
+    );
 
     return (
         <>
             <InputContext.Provider value={{ inputNodeListRef }}>
-                {Object.entries(currentCard).map(([category, rows], index) => (
-                    <InputCategory
-                        category={category}
-                        rows={rows}
-                        key={`Input Category ${index}`}
-                    />
-                ))}
+                
             </InputContext.Provider>
         </>
     );

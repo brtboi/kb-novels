@@ -1,23 +1,26 @@
 import React from "react";
-import { CardRows } from "../../entity/types.ts";
+import { CardCategory, CardRow } from "../../entity/types.ts";
 import InputRow from "./InputRow.tsx";
 
 interface Props {
-    category: string;
-    rows: CardRows;
+    category: CardCategory;
+    addInputRef: (ref: React.RefObject<HTMLInputElement>) => number;
+    focusNextInput: (index: number, step: -1 | 1) => void;
 }
 
-export default function InputCategory({ category, rows }: Props) {
-
+export default function InputCategory({
+    category,
+    addInputRef,
+    focusNextInput,
+}: Props) {
     return (
         <>
-            {Object.entries(rows).map(([label, answer], index) => {
+            {category.rows.map((row, rowIndex) => {
                 return (
                     <InputRow
-                        category={category}
-                        label={label}
-                        answer={answer}
-                        key={`Input Row ${label} ${answer} ${index}`}
+                        row={row}
+                        addInputRef={addInputRef}
+                        focusNextInput={focusNextInput}
                     />
                 );
             })}
