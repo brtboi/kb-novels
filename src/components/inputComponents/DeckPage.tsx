@@ -13,7 +13,7 @@ export default function DeckPage() {
 
     const inputRefs = useRef<React.RefObject<HTMLInputElement>[]>([]);
 
-    const [categorySubmitted, setCategorySubmitted] = useState<boolean[]>([]);
+    const [categoryStates, setCategoryStates] = useState<boolean[]>([]);
     const [rowStates, setRowStates] = useState<STATE[]>([]);
 
     useEffect(() => {
@@ -38,12 +38,16 @@ export default function DeckPage() {
                     inputRefs.current.push(createRef<HTMLInputElement>());
                     setRowStates((prev) => [...prev, STATE.ASK]);
                 });
-                setCategorySubmitted((prev) => [...prev, false]);
+                setCategoryStates((prev) => [...prev, false]);
             });
         }
     }, [cards, cardIndex]);
 
-    const focusNextInput = (inputIndex: number, step: -1 | 1, isRowAnswered: boolean) => {
+    const focusNextInput = (
+        inputIndex: number,
+        step: -1 | 1,
+        isRowAnswered: boolean
+    ) => {
         let nextIndex =
             (inputIndex + inputRefs.current.length + step) %
             inputRefs.current.length;
@@ -63,6 +67,14 @@ export default function DeckPage() {
             const newRowStates = structuredClone(prev);
             newRowStates[inputIndex] = newState;
             return newRowStates;
+        });
+    };
+
+    const updateCategoryStates = (categoryIndex: number, newState: boolean) => {
+        setCategoryStates((prev) => {
+            const newCategoryStates = structuredClone(prev);
+            newCategoryStates[categoryIndex] = newState;
+            return newCategoryStates;
         });
     };
 
@@ -129,6 +141,14 @@ export default function DeckPage() {
                                         startIndex
                                     )}
                                     startIndex={thisStartIndex}
+                                    updateCategoryStates={(
+                                        newState: boolean
+                                    ) => {
+                                        updateCategoryStates(
+                                            categoryIndex,
+                                            newState
+                                        );
+                                    }}
                                     handleKeyDown={handleKeyDown}
                                     key={`category ${categoryIndex}`}
                                 />

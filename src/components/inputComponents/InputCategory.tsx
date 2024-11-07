@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { CardCategory, CardRow, STATE } from "../../entity/types.ts";
 import InputRow from "./InputRow.tsx";
 
@@ -7,6 +7,7 @@ interface Props {
     inputRefs: React.RefObject<HTMLInputElement>[];
     rowStates: STATE[];
     startIndex: number;
+    updateCategoryStates: (newState: boolean) => void;
     handleKeyDown: (
         inputIndex: number,
         event: React.KeyboardEvent<HTMLInputElement>,
@@ -19,8 +20,19 @@ export default function InputCategory({
     inputRefs,
     rowStates,
     startIndex,
+    updateCategoryStates,
     handleKeyDown,
 }: Props) {
+    useEffect(() => {
+        if (
+            rowStates
+                .slice(startIndex, startIndex + category.rows.length)
+                .every((state) => state !== STATE.ASK)
+        ) {
+            updateCategoryStates(true);
+        }
+    }, [rowStates]);
+
     return (
         <>
             {category.rows.map((row, rowIndex) => {
