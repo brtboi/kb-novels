@@ -1,17 +1,25 @@
 import React from "react";
-import { CardCategory, CardRow } from "../../entity/types.ts";
+import { CardCategory, CardRow, STATE } from "../../entity/types.ts";
 import InputRow from "./InputRow.tsx";
 
 interface Props {
     category: CardCategory;
-    addInputRef: (ref: React.RefObject<HTMLInputElement>) => number;
-    focusNextInput: (index: number, step: -1 | 1) => void;
+    inputRefs: React.RefObject<HTMLInputElement>[];
+    rowStates: STATE[];
+    startIndex: number;
+    handleKeyDown: (
+        inputIndex: number,
+        event: React.KeyboardEvent<HTMLInputElement>,
+        row: CardRow
+    ) => void;
 }
 
 export default function InputCategory({
     category,
-    addInputRef,
-    focusNextInput,
+    inputRefs,
+    rowStates,
+    startIndex,
+    handleKeyDown,
 }: Props) {
     return (
         <>
@@ -19,8 +27,12 @@ export default function InputCategory({
                 return (
                     <InputRow
                         row={row}
-                        addInputRef={addInputRef}
-                        focusNextInput={focusNextInput}
+                        state={rowStates[rowIndex]}
+                        handleKeyDown={(e) => {
+                            handleKeyDown(startIndex + rowIndex, e, row);
+                        }}
+                        ref={inputRefs[rowIndex]}
+                        key={`row ${startIndex + rowIndex}`}
                     />
                 );
             })}

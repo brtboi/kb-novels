@@ -64,13 +64,6 @@ export default function EditPage() {
         });
     };
 
-    // const handleAddCard = (cardIndex: number) => {
-    //     const newCard: Card = structuredClone(templateCard!);
-    //     const updatedCards = cards!;
-    //     updatedCards.splice(cardIndex, 0, newCard);
-    //     setCards(updatedCards);
-    // };
-
     const addCard = () => {
         const newCard: Card = structuredClone(templateCard!);
         setCards((prev) => [...prev!, newCard]);

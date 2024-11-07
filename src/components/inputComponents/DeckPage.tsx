@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Card, STATE } from "../../entity/types.ts";
+import React, { useState, useEffect, useRef, createRef } from "react";
+import { Card, CardRow, STATE } from "../../entity/types.ts";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase.ts";
 import { useParams } from "react-router-dom";
@@ -11,11 +11,9 @@ export default function DeckPage() {
     const [cards, setCards] = useState<Card[] | null>(null);
     const [cardIndex, setCardIndex] = useState<number>(0);
 
-    const [inputRefs, setInputRefs] = useState<
-        React.RefObject<HTMLInputElement>[]
-    >([]);
+    const inputRefs = useRef<React.RefObject<HTMLInputElement>[]>([]);
 
-    const [categoryStates, setCategoryStates] = useState<boolean[]>([]);
+    const [categorySubmitted, setCategorySubmitted] = useState<boolean[]>([]);
     const [rowStates, setRowStates] = useState<STATE[]>([]);
 
     useEffect(() => {
@@ -31,28 +29,111 @@ export default function DeckPage() {
         fetchCards();
     }, [deckId]);
 
-    const addInputRef = (ref: React.RefObject<HTMLInputElement>) => {
-        setInputRefs((prev) => [...prev, ref]);
-        return inputRefs.length;
+    // Define inputRefs, rowStates, and categorySubmitted
+    useEffect(() => {
+        if (cards) {
+            inputRefs.current = [];
+            cards[cardIndex].categories.forEach((category) => {
+                category.rows.forEach(() => {
+                    inputRefs.current.push(createRef<HTMLInputElement>());
+                    setRowStates((prev) => [...prev, STATE.ASK]);
+                });
+                setCategorySubmitted((prev) => [...prev, false]);
+            });
+        }
+    }, [cards, cardIndex]);
+
+    const focusNextInput = (inputIndex: number, step: -1 | 1, isRowAnswered: boolean) => {
+        let nextIndex =
+            (inputIndex + inputRefs.current.length + step) %
+            inputRefs.current.length;
+
+        while (nextIndex !== inputIndex && rowStates[nextIndex] !== STATE.ASK) {
+            nextIndex =
+                (nextIndex + inputRefs.current.length + step) %
+                inputRefs.current.length;
+        }
+
+        if (nextIndex === inputIndex && isRowAnswered) console.log("next book");
+        else inputRefs.current[nextIndex].current?.focus();
     };
 
-    const focusNextInput = (index: number, step: -1 | 1) => {
-        const nextIndex = (index + inputRefs.length + step) % inputRefs.length;
-        const nextRef = inputRefs[nextIndex].current;
-        if (nextRef) nextRef.focus();
-        else console.log(`Error: next inputRef at index ${nextIndex} is null`);
+    const updateRowState = (inputIndex: number, newState: STATE) => {
+        setRowStates((prev) => {
+            const newRowStates = structuredClone(prev);
+            newRowStates[inputIndex] = newState;
+            return newRowStates;
+        });
     };
+
+    const handleKeyDown = (
+        inputIndex: number,
+        event: React.KeyboardEvent<HTMLInputElement>,
+        row: CardRow
+    ) => {
+        const value = event.currentTarget.value;
+        const isAnswerCorrect =
+            (row._isCaseSensitive && value === row.answer) ||
+            (!row._isCaseSensitive &&
+                value.toUpperCase() === row.answer.toUpperCase());
+
+        switch (event.key) {
+            case "Enter":
+                event.preventDefault();
+                if (value === "") {
+                    focusNextInput(inputIndex!, 1, false);
+                } else if (isAnswerCorrect) {
+                    updateRowState(inputIndex, STATE.CORRECT);
+                    focusNextInput(inputIndex!, 1, isAnswerCorrect);
+                } else if (value === "idk") {
+                    updateRowState(inputIndex, STATE.INCORRECT);
+                    focusNextInput(inputIndex!, 1, true);
+                } else {
+                    inputRefs.current[inputIndex].current?.select();
+                }
+
+                break;
+
+            case "ArrowUp":
+                event.preventDefault();
+                focusNextInput(inputIndex, -1, false);
+                break;
+
+            case "ArrowDown":
+                event.preventDefault();
+                focusNextInput(inputIndex, 1, false);
+                break;
+        }
+    };
+
+    let startIndex = 0;
 
     return (
         <>
             {cards !== null ? (
                 <>
-                    {cards[cardIndex].categories.map((category) => 
-                        <InputCategory
-                            category={category}
-                            addInputRef={addInputRef}
-                            focusNextInput={focusNextInput}
-                        />
+                    {cards[cardIndex].categories.map(
+                        (category, categoryIndex) => {
+                            const thisStartIndex = startIndex;
+                            startIndex += category.rows.length;
+
+                            return (
+                                <InputCategory
+                                    category={category}
+                                    inputRefs={inputRefs.current.slice(
+                                        thisStartIndex,
+                                        startIndex
+                                    )}
+                                    rowStates={rowStates.slice(
+                                        thisStartIndex,
+                                        startIndex
+                                    )}
+                                    startIndex={thisStartIndex}
+                                    handleKeyDown={handleKeyDown}
+                                    key={`category ${categoryIndex}`}
+                                />
+                            );
+                        }
                     )}
                 </>
             ) : (
