@@ -3,6 +3,7 @@ import classNames from "classnames";
 import styles from "./editStyles.module.css";
 import { CardCategory, CardRow, ROWTYPE } from "../../entity/types";
 import EditRow from "./EditRow";
+import EditAddButton from "./EditAddButton";
 
 interface Props {
     category: CardCategory;
@@ -48,11 +49,12 @@ export default function EditCategory({
     return (
         <div className={classNames(styles.CardCategory)}>
             <input
-                className={classNames(styles.Input)}
+                className={classNames(styles.CategoryName, styles.Input)}
                 type="text"
                 value={categoryName}
                 onChange={handleUpdateCategoryName}
                 onBlur={handleCategoryNameOnBlur}
+                style={{width: `${Math.max(categoryName.length + 2, 1)}ch`}}
             />
             {category.rows.map((row, rowIndex) => (
                 <EditRow
@@ -64,7 +66,7 @@ export default function EditCategory({
                     key={`${category.name} | ${rowIndex} | ${row.label}`}
                 />
             ))}
-            <button onClick={handleAddRow}>Add Row</button>
+            <EditAddButton onClick={handleAddRow}>Add Row</EditAddButton>
         </div>
     );
 }
