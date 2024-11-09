@@ -35,7 +35,7 @@ export default function Row({ row, updateRow, addRow, isTemplate }: RowProps) {
     };
 
     return (
-        <>
+        <div>
             <div>
                 <input
                     className={classNames(styles.Input)}
@@ -54,11 +54,7 @@ export default function Row({ row, updateRow, addRow, isTemplate }: RowProps) {
                     />
                 )}
             </div>
-            <EditAddButton
-                onClick={addRow}
-            >
-                Add Row
-            </EditAddButton>
-        </>
+            <EditAddButton onClick={addRow}>Add Row</EditAddButton>
+        </div>
     );
 }
