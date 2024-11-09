@@ -30,17 +30,21 @@ export default function EditCategory({
         setCategoryName(newName);
     };
 
-    const handleAddRow = () => {
+    const addRow = (index: number) => {
         const newRow: CardRow = {
             label: `Row_${category.rows.length}`,
             answer: "",
             _type: ROWTYPE.STRING,
             _isCaseSensitive: false,
         };
-        updateCategory({ ...category, rows: [...category.rows, newRow] });
+
+        const updatedRows = structuredClone(category.rows)
+        updatedRows.splice(index, 0, newRow);
+
+        updateCategory({ ...category, rows: updatedRows });
     };
 
-    const handleUpdateRow = (rowIndex: number, newRow: CardRow) => {
+    const updateRow = (rowIndex: number, newRow: CardRow) => {
         const updatedRows = structuredClone(category.rows);
         updatedRows[rowIndex] = newRow;
         updateCategory({ ...category, rows: updatedRows });
@@ -54,19 +58,20 @@ export default function EditCategory({
                 value={categoryName}
                 onChange={handleUpdateCategoryName}
                 onBlur={handleCategoryNameOnBlur}
-                style={{width: `${Math.max(categoryName.length + 2, 1)}ch`}}
+                style={{ width: `${Math.max(categoryName.length + 2, 1)}ch` }}
             />
+            <EditAddButton onClick={() => {addRow(0)}}>Add Row</EditAddButton>
             {category.rows.map((row, rowIndex) => (
                 <EditRow
                     row={row}
                     updateRow={(newRow) => {
-                        handleUpdateRow(rowIndex, newRow);
+                        updateRow(rowIndex, newRow);
                     }}
+                    addRow={() => {addRow(rowIndex + 1)}}
                     isTemplate={isTemplate}
                     key={`${category.name} | ${rowIndex} | ${row.label}`}
                 />
             ))}
-            <EditAddButton onClick={handleAddRow}>Add Row</EditAddButton>
         </div>
     );
 }
