@@ -5,11 +5,25 @@ import { db } from "../../firebase/firebase.ts";
 import { useParams } from "react-router-dom";
 import InputCategory from "./InputCategory.tsx";
 
+interface CardBoxes {
+    box0: number[];
+    box1: number[];
+    box2: number[];
+    box3: number[];
+}
+
 export default function DeckPage() {
     const { deckId } = useParams<{ deckId: string }>();
 
+    const [template, setTemplate] = useState<Card | null>(null)
     const [cards, setCards] = useState<Card[] | null>(null);
     const [cardIndex, setCardIndex] = useState<number>(0);
+    const cardBoxes = useRef<CardBoxes>({
+        box0: [],
+        box1: [],
+        box2: [],
+        box3: [],
+    });
 
     const inputRefs = useRef<React.RefObject<HTMLInputElement>[]>([]);
 
@@ -20,7 +34,14 @@ export default function DeckPage() {
         const fetchCards = async () => {
             try {
                 const docSnapshot = await getDoc(doc(db, `decks/${deckId}`));
+                setTemplate(JSON.parse(docSnapshot.data()?.template))
                 setCards(JSON.parse(docSnapshot.data()?.cards));
+
+                // puts indices 0 to nCards - 1 into box0
+                cardBoxes.current.box0 = Array.from(
+                    docSnapshot.data()?.cards,
+                    (_, index) => index
+                );
             } catch (e) {
                 console.error("Error fetching CARDS", e);
             }
@@ -33,6 +54,8 @@ export default function DeckPage() {
     useEffect(() => {
         if (cards) {
             inputRefs.current = [];
+            setRowStates([]);
+            setCategoryStates([]);
             cards[cardIndex].categories.forEach((category) => {
                 category.rows.forEach(() => {
                     inputRefs.current.push(createRef<HTMLInputElement>());
@@ -41,7 +64,15 @@ export default function DeckPage() {
                 setCategoryStates((prev) => [...prev, false]);
             });
         }
+
+        // focusNextInput(-1, 1, false);
     }, [cards, cardIndex]);
+
+    const getNextCard = () => {
+        console.log("next card got");
+        setCardIndex((prev) => (prev + 1) % cards!.length);
+        // setCardIndex(Math.floor(cards!.length * Math.random()));
+    };
 
     const focusNextInput = (
         inputIndex: number,
@@ -58,7 +89,7 @@ export default function DeckPage() {
                 inputRefs.current.length;
         }
 
-        if (nextIndex === inputIndex && isRowAnswered) console.log("next book");
+        if (nextIndex === inputIndex && isRowAnswered) getNextCard();
         else inputRefs.current[nextIndex].current?.focus();
     };
 
@@ -95,9 +126,11 @@ export default function DeckPage() {
                 if (value === "") {
                     focusNextInput(inputIndex!, 1, false);
                 } else if (isAnswerCorrect) {
+                    inputRefs.current[inputIndex].current!.value = "";
                     updateRowState(inputIndex, STATE.CORRECT);
                     focusNextInput(inputIndex!, 1, isAnswerCorrect);
                 } else if (value === "idk") {
+                    inputRefs.current[inputIndex].current!.value = "";
                     updateRowState(inputIndex, STATE.INCORRECT);
                     focusNextInput(inputIndex!, 1, true);
                 } else {

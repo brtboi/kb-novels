@@ -16,7 +16,7 @@
 
 .Label {
     margin: var(--marginSize);
-    width: 12rem;
+    width: 30%;
 
     text-align: right;
 }
@@ -32,11 +32,18 @@
     color: inherit;
 }
 
-.Input.correct {
+
+
+.Answer {
+    margin: var(--marginSize);
+    width: 25rem;
+}
+
+.Answer.correct {
     color: lightGreen;
 }
 
-.Input.incorrect {
+.Answer.incorrect {
     color: tomato;
 }
 
@@ -56,11 +63,6 @@
 
 .shake {
     animation: shake 0.3s ease-in-out;
-}
-
-.Answer {
-    margin: var(--marginSize);
-    width: 25rem;
 }
 
 .hidden {

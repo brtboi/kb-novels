@@ -11,48 +11,13 @@ interface Props {
 
 export default React.forwardRef<HTMLInputElement, Props>(
     ({ row, state, handleKeyDown }, ref) => {
-        // const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        //     const value = event.currentTarget.value;
-
-        //     switch (event.key) {
-        //         case "Enter":
-        //             if (value === "") {
-        //                 thisInputNode!.step(1);
-        //             } else if (
-        //                 answer.some(
-        //                     (e: string | number) =>
-        //                         e.toString().toLocaleUpperCase() ===
-        //                         value.toLocaleUpperCase()
-        //                 )
-        //             ) {
-        //                 thisInputNode!.state = STATE.CORRECT;
-        //                 thisInputNode!.step(1);
-        //             } else if (value === "idk") {
-        //                 thisInputNode!.state = STATE.INCORRECT;
-        //                 thisInputNode!.step(1);
-        //             } else {
-        //                 event.currentTarget.select();
-        //             }
-        //             break;
-
-        //         case "ArrowUp":
-        //             thisInputNode!.step(-1);
-        //             break;
-
-        //         case "ArrowDown":
-        //             thisInputNode!.step(1);
-        //             break;
-        //     }
-        // };
 
         return (
             <div className={styles.InputRow}>
                 <label className={styles.Label}>{`${row.label}:`}</label>
                 <input
                     className={classNames(styles.Input, {
-                        [styles.correct]: state === STATE.CORRECT,
-                        [styles.incorrect]: state === STATE.INCORRECT,
-                        [styles.shake]: state === STATE.INCORRECT,
+                        [styles.hidden]: state !== STATE.ASK
                     })}
                     type="text"
                     autoComplete="off"
@@ -60,7 +25,12 @@ export default React.forwardRef<HTMLInputElement, Props>(
                     onKeyDown={handleKeyDown}
                     ref={ref}
                 />
-                <p className={styles.Answer}>{row.answer}</p>
+                <p className={classNames(styles.Answer, {
+                    [styles.hidden]: state === STATE.ASK,
+                    [styles.correct]: state === STATE.CORRECT,
+                    [styles.incorrect]: state === STATE.INCORRECT,
+                    [styles.shake]: state === STATE.INCORRECT,
+                })}>{row.answer}</p>
             </div>
         );
     }

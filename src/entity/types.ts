@@ -9,6 +9,7 @@ export enum STATE {
 export enum ROWTYPE {
     STRING = "string",
     NUMBER = "number",
+    YEAR = "year",
 }
 
 export type CardRow = {
@@ -35,5 +36,3 @@ export type Deck = {
     name: string;
     cards: Card[];
 };
-
-
