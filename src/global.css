@@ -1,15 +1,18 @@
 @font-face {
     font-family: "Roboto Mono";
-    src: url(./assets/Roboto_Mono/RobotoMono-VariableFont_wght.ttf) format("ttf"),
-         url(./assets/Roboto_Mono/RobotoMono-Italic-VariableFont_wght.ttf) format("ttf");
+    src: url(./assets/Roboto_Mono/RobotoMono-VariableFont_wght.ttf)
+            format("ttf"),
+        url(./assets/Roboto_Mono/RobotoMono-Italic-VariableFont_wght.ttf)
+            format("ttf");
 }
 
 :root {
     --marginSize: 0.5rem;
-    
+
     --backgroundColor: #232427;
     --primaryColor: #d67e0b;
-    
+    --secondaryColor: #1481ba;
+
     --fontFamily: "Roboto Mono", monospace;
     --fontSize: 24px;
     --fontWeight: 700;
@@ -22,7 +25,8 @@
     border: none;
     padding: 0px;
     overflow: auto;
-    box-sizing: border-box
+    box-sizing: border-box;
+    outline: none;
 }
 
 body {

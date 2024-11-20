@@ -14,14 +14,15 @@ export enum ROWTYPE {
 
 export type CardRow = {
     label: string;
-    answer: string;
+    answers: string[];
     _type: ROWTYPE;
     _isCaseSensitive: boolean;
 };
 
 export type CardCategory = {
+    _ID: string;
     _dependencies: string[];
-    _isOrdered: boolean;
+    _isShuffled: boolean;
     _isSequential: boolean;
     name: string;
     rows: CardRow[];

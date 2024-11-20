@@ -35,7 +35,6 @@ export default function EditPage() {
         } else {
             fetchCards();
         }
-
     }, [deckId]);
 
     const handleSaveDeck = async () => {
@@ -43,10 +42,10 @@ export default function EditPage() {
             const docRef = await addDoc(collection(db, "decks"), {
                 name: deckName,
                 template: JSON.stringify(templateCard),
-                cards: JSON.stringify(cards)
+                cards: JSON.stringify(cards),
             });
 
-            console.log("Doc created successfully with ID:", docRef.id)
+            console.log("Doc created successfully with ID:", docRef.id);
         } catch (error) {
             console.error("Error saving deck to db:", error);
         }
@@ -69,20 +68,33 @@ export default function EditPage() {
         setCards((prev) => [...prev!, newCard]);
     };
 
+    const deleteCard = (index: number) => {
+        setCards((prev) => {
+            const updatedCards = structuredClone(prev!);
+            updatedCards.splice(index, 1);
+            return updatedCards;
+        });
+    };
+
     return (
         <>
             {deckName !== null && templateCard !== null && cards !== null ? (
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                    <input
-                        className={classNames(styles.Input)}
-                        value={deckName}
-                        onChange={(e) => {
-                            setDeckName(e.target.value);
-                        }}
-                    />
+                    <p>
+                        Deck Name:
+                        <input
+                            className={classNames(styles.Input)}
+                            value={deckName}
+                            onChange={(e) => {
+                                setDeckName(e.target.value);
+                            }}
+                        />
+                    </p>
+
                     <p>Template:</p>
                     <EditCard
                         card={templateCard}
+                        cardIndex={0}
                         updateCard={updateTemplateCard}
                         isTemplate={true}
                     />
@@ -90,9 +102,11 @@ export default function EditPage() {
                     {cards.map((card, cardIndex) => (
                         <EditCard
                             card={card}
+                            cardIndex={cardIndex}
                             updateCard={(newCard: Card) => {
                                 updateCard(cardIndex, newCard);
                             }}
+                            deleteCard={() => {deleteCard(cardIndex)}}
                             isTemplate={false}
                             key={`card ${cardIndex}`}
                         />

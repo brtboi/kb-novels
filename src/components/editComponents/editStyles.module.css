@@ -1,13 +1,3 @@
-.Input {
-    margin: var(--marginSize);
-    background-color: transparent;
-    outline: none;
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-    color: inherit;
-}
-
 button {
     background-color: transparent;
     outline: none;
@@ -18,8 +8,47 @@ button {
     cursor: pointer;
 }
 
+.SettingsButton {
+    height: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: row;
+    border-radius: 1rem;
+    justify-content: space-around;
+    align-items: center;
+    overflow: hidden;
+    transition: background-color 100ms ease-in;
+    fill: var(--fontColor);
+}
+
+.SettingsButton:hover {
+    background-color: rgb(100, 100, 100);
+    transition: background-color 100ms ease-in;
+}
+
+.SettingsButton.toggleOn {
+    background-color: var(--primaryColor);
+}
+
+.Input {
+    margin: var(--marginSize);
+    background-color: transparent;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+}
+
+.Icon {
+    fill: inherit;
+    stroke: inherit;
+}
+
+.Input:hover {
+    text-decoration: underline;
+}
+
 .CardCategory {
-    position: relative;
     display: flex;
     flex-direction: column;
     margin: var(--marginSize);
@@ -29,41 +58,153 @@ button {
     overflow: visible;
 }
 
+.CategoryHeader {
+    position: absolute;
+    transform: translateY(-1rem) translateY(-2px) translateY(-50%);
+    height: 2rem;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0 2rem 0 2rem;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    overflow: visible;
+
+    fill: var(--fontColor);
+}
+
+.DependenciesDrawer {
+    position: absolute;
+    top: 2.5rem;
+    right: 2rem;
+    border: 4px solid var(--fontColor);
+    border-radius: 1rem;
+    padding: var(--marginSize);
+
+    background: var(--backgroundColor);
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+}
+
+.DependenciesDrawer::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: 1rem;
+    height: 1rem;
+    transform: translate(0, -1rem) rotate(45deg);
+    background-color: var(--fontColor);
+}
+
+.DependenciesRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .CategoryName {
     /* width controlled in EditCategory.tsx */
-    position: absolute;
-    top: -1.5rem;
+    margin: 0;
     padding: 0 1ch 0 1ch;
     border-radius: 1rem;
     background-color: var(--backgroundColor);
 }
 
-.AddButtonDiv {
-    position: absolute;
+.AddButton {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
-    width: 90vw;
-}
-
-.AddButtonDiv:hover .AddButton {
-    opacity: 100;
-    transition: opacity 0.1s ease-in;
-}
-
-.AddButton {
-    padding: 0 1rem 0 1rem;
     background-color: var(--primaryColor);
-    color: var(--backgroundColor);
+    transition: background-color 100ms ease-in;
     border-radius: 1rem;
-    opacity: 0;
-    transition: opacity 0.1s ease-in;
     overflow: hidden;
-
     justify-content: center;
-    align-content: center;
+    align-items: center;
+    color: var(--backgroundColor);
+    fill: var(--backgroundColor);
+    stroke: var(--backgroundColor);
 }
 
 .AddButton:hover {
     background-color: var(--fontColor);
+    transition: background-color 100ms ease-in;
+}
+
+.CategoryHeader .AddButton {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0 1rem 0 1rem;
+}
+
+.CategorySettingsDiv {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    height: 100%;
+    border: var(--fontColor) solid 4px;
+    border-radius: 10rem;
+    padding: 0 1rem 0 1rem;
+    background-color: var(--backgroundColor);
+    overflow: hidden;
+}
+
+.CardRow {
+    display: flex;
+    flex-direction: row;
+}
+
+.LabelDiv {
+    display: flex;
+    justify-content: flex-end;
+    align-items: top;
+    height: 44px;
+    margin: 0 var(--marginSize);
+    width: 30%;
+}
+
+.Label {
+    margin: 0;
+    text-align: right;
+}
+
+.LabelColon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.AnswerDiv {
+    display: flex;
+    flex-direction: column;
+}
+
+.AnswerRow {
+    display: flex;
+    flex-direction: row;
+}
+
+.Answer {
+    width: 25rem;
+    outline: var(--fontColor) solid 2px;
+}
+
+.Answer:hover {
+    text-decoration: none;
+}
+
+.CardRow .AddButton {
+    margin: 6px 0 0 0;
+    width: 2rem;
+    height: 2rem;
+    align-self: top;
+}
+
+.CardRow .SettingsButton {
+    width: 2rem;
+    height: 2rem;
+    align-self: center;
 }

@@ -1,20 +1,44 @@
 import React from "react";
 import { Card, CardCategory } from "../../entity/types";
 import EditCategory from "./EditCategory";
+import { ReactComponent as DeleteIcon } from "../../assets/Icons/Delete.svg";
+import styles from "./editStyles.module.css";
+import classNames from "classnames";
 
-interface Props {
-    card: Card;
-    updateCard: (newCard: Card) => void;
-    isTemplate: boolean;
-}
+type Props =
+    | {
+          card: Card;
+          cardIndex: number;
+          updateCard: (newCard: Card) => void;
+          deleteCard?: never;
+          isTemplate: true;
+      }
+    | {
+          card: Card;
+          cardIndex: number;
+          updateCard: (newCard: Card) => void;
+          deleteCard: () => void;
+          isTemplate: false;
+      };
 
-export default function EditCard({ card, updateCard, isTemplate }: Props) {
-    
+export default function EditCard({
+    card,
+    cardIndex,
+    updateCard,
+    deleteCard,
+    isTemplate,
+}: Props) {
+    //
+    const categoryDict: Record<string, string> = Object.fromEntries(
+        card.categories.map((category) => [category._ID, category.name])
+    );
+
     const handleAddCategory = () => {
         const blankCategory = {
             _dependencies: [],
-            _isOrdered: false,
+            _isShuffled: false,
             _isSequential: false,
+            _ID: `${new Date().toISOString()}-${Math.random()}`,
             name: `Category_${card.categories.length}`,
             rows: [],
         };
@@ -30,14 +54,32 @@ export default function EditCard({ card, updateCard, isTemplate }: Props) {
         categoryIndex: number,
         newCategory: CardCategory
     ) => {
-        const newCategories = [...card.categories];
-        newCategories[categoryIndex] = newCategory;
+        const updatedCategories = [...card.categories];
+        updatedCategories[categoryIndex] = newCategory;
 
-        updateCard({ ...card, categories: newCategories });
+        updateCard({ ...card, categories: updatedCategories });
+    };
+
+    const deleteCategory = (categoryIndex: number) => {
+        const updatedCategories = [...card.categories];
+        updatedCategories.splice(categoryIndex, 1);
+
+        updateCard({ ...card, categories: updatedCategories });
     };
 
     return (
         <>
+            {!isTemplate && (
+                <p style={{display: "flex"}}>
+                    {`Card ${cardIndex}`} |{" "}
+                    <button
+                        onClick={deleteCard}
+                        className={classNames(styles.SettingsButton)}
+                    >
+                        <DeleteIcon className={classNames(styles.Icon)} />
+                    </button>
+                </p>
+            )}
             {card.categories.map((category, categoryIndex) => {
                 return (
                     <EditCategory
@@ -45,7 +87,11 @@ export default function EditCard({ card, updateCard, isTemplate }: Props) {
                         updateCategory={(newCategory) => {
                             handleUpdateCategory(categoryIndex, newCategory);
                         }}
+                        deleteCategory={() => {
+                            deleteCategory(categoryIndex);
+                        }}
                         isTemplate={isTemplate}
+                        categoryDict={categoryDict}
                         key={`category ${category.name} | ${categoryIndex}`}
                     />
                 );
