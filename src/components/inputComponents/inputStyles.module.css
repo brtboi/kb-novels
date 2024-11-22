@@ -23,7 +23,7 @@
 
 .Input {
     margin: var(--marginSize);
-    width: 25rem;
+    width: 70%;
     background-color: transparent;
     outline: none;
     font-family: inherit;
@@ -32,11 +32,9 @@
     color: inherit;
 }
 
-
-
 .Answer {
     margin: var(--marginSize);
-    width: 25rem;
+    width: 70%;
 }
 
 .Answer.correct {

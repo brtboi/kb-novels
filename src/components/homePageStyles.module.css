@@ -1,9 +1,19 @@
-.DeckLink {
+.HomePageDiv {
+    display: flex;
+    flex-direction: column;
+}
+
+.HomePageRow {
     width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.DeckLink {
     color: inherit;
 }
 
 .DeckLink:hover {
-    background-color: lightgray;
+    background-color: var(--fontColorSecondary);
 }
-

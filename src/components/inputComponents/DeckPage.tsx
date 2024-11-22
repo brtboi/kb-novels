@@ -15,7 +15,9 @@ interface CardBoxes {
 export default function DeckPage() {
     const { deckId } = useParams<{ deckId: string }>();
 
-    const [template, setTemplate] = useState<Card | null>(null)
+    const [updateVariable, setUpdateVariable] = useState<number>(0);
+
+    const [template, setTemplate] = useState<Card | null>(null);
     const [cards, setCards] = useState<Card[] | null>(null);
     const [cardIndex, setCardIndex] = useState<number>(0);
     const cardBoxes = useRef<CardBoxes>({
@@ -29,12 +31,13 @@ export default function DeckPage() {
 
     const [categoryStates, setCategoryStates] = useState<boolean[]>([]);
     const [rowStates, setRowStates] = useState<STATE[]>([]);
+    const [isCardDone, setIsCardDone] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchCards = async () => {
             try {
                 const docSnapshot = await getDoc(doc(db, `decks/${deckId}`));
-                setTemplate(JSON.parse(docSnapshot.data()?.template))
+                setTemplate(JSON.parse(docSnapshot.data()?.template));
                 setCards(JSON.parse(docSnapshot.data()?.cards));
 
                 // puts indices 0 to nCards - 1 into box0
@@ -63,13 +66,29 @@ export default function DeckPage() {
                 });
                 setCategoryStates((prev) => [...prev, false]);
             });
-        }
 
-        // focusNextInput(-1, 1, false);
+            setUpdateVariable((prev) => prev + 1);
+        }
     }, [cards, cardIndex]);
 
+    useEffect(() => {
+        if (cards && inputRefs.current.length > 0 && rowStates.length > 0) {
+            focusNextInput(inputRefs.current.length - 1, 1, false);
+        }
+    }, [cards, cardIndex, updateVariable]);
+
+    useEffect(() => {
+        const handleGlobalKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Enter" && isCardDone) getNextCard();
+        };
+
+        document.addEventListener("keydown", handleGlobalKeyDown);
+        return () =>
+            document.removeEventListener("keydown", handleGlobalKeyDown);
+    });
+
     const getNextCard = () => {
-        console.log("next card got");
+        setIsCardDone(false);
         setCardIndex((prev) => (prev + 1) % cards!.length);
         // setCardIndex(Math.floor(cards!.length * Math.random()));
     };
@@ -84,13 +103,24 @@ export default function DeckPage() {
             inputRefs.current.length;
 
         while (nextIndex !== inputIndex && rowStates[nextIndex] !== STATE.ASK) {
+            console.log(
+                "hi from while",
+                inputIndex,
+                nextIndex,
+                rowStates[nextIndex]
+            );
             nextIndex =
                 (nextIndex + inputRefs.current.length + step) %
                 inputRefs.current.length;
         }
 
-        if (nextIndex === inputIndex && isRowAnswered) getNextCard();
-        else inputRefs.current[nextIndex].current?.focus();
+        if (nextIndex === inputIndex && isRowAnswered) {
+            setTimeout(() => {
+                setIsCardDone(true);
+            }, 10);
+        }
+
+        inputRefs.current[nextIndex].current?.focus();
     };
 
     const updateRowState = (inputIndex: number, newState: STATE) => {
@@ -116,9 +146,11 @@ export default function DeckPage() {
     ) => {
         const value = event.currentTarget.value;
         const isAnswerCorrect =
-            (row._isCaseSensitive && value === row.answer) ||
+            (row._isCaseSensitive && row.answers.some((e) => e === value)) ||
             (!row._isCaseSensitive &&
-                value.toUpperCase() === row.answer.toUpperCase());
+                row.answers.some(
+                    (e) => e.toUpperCase() === value.toUpperCase()
+                ));
 
         switch (event.key) {
             case "Enter":
@@ -188,6 +220,7 @@ export default function DeckPage() {
                             );
                         }
                     )}
+                    <button onClick={getNextCard}>next Card</button>
                 </>
             ) : (
                 <p>Loading...</p>

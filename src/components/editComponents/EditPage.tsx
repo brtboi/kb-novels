@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Card } from "../../entity/types";
-import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import EditCard from "./EditCard";
 import classNames from "classnames";
@@ -38,16 +38,31 @@ export default function EditPage() {
     }, [deckId]);
 
     const handleSaveDeck = async () => {
-        try {
-            const docRef = await addDoc(collection(db, "decks"), {
-                name: deckName,
-                template: JSON.stringify(templateCard),
-                cards: JSON.stringify(cards),
-            });
+        if (deckId === "new") {
+            try {
+                const docRef = await addDoc(collection(db, "decks"), {
+                    name: deckName,
+                    template: JSON.stringify(templateCard),
+                    cards: JSON.stringify(cards),
+                });
 
-            console.log("Doc created successfully with ID:", docRef.id);
-        } catch (error) {
-            console.error("Error saving deck to db:", error);
+                console.log("Doc created successfully with ID:", docRef.id);
+            } catch (error) {
+                console.error("Error saving deck to db:", error);
+            }
+        } else {
+            const docRef = doc(db, `decks/${deckId}`);
+            try {
+                await updateDoc(docRef, {
+                    name: deckName,
+                    template: JSON.stringify(templateCard),
+                    cards: JSON.stringify(cards),
+                });
+
+                console.log("Doc successfully saved");
+            } catch (error) {
+                console.error("Error saving deck to db:", error);
+            }
         }
     };
 
@@ -106,7 +121,9 @@ export default function EditPage() {
                             updateCard={(newCard: Card) => {
                                 updateCard(cardIndex, newCard);
                             }}
-                            deleteCard={() => {deleteCard(cardIndex)}}
+                            deleteCard={() => {
+                                deleteCard(cardIndex);
+                            }}
                             isTemplate={false}
                             key={`card ${cardIndex}`}
                         />

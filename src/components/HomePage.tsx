@@ -2,10 +2,13 @@ import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { Deck } from "../entity/types";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./homePageStyles.module.css";
+import classNames from "classnames";
 
 export default function HomePage() {
+    const navigate = useNavigate();
+
     const [allDecks, setAllDecks] = useState<Deck[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -36,20 +39,23 @@ export default function HomePage() {
             {isLoading ? (
                 <p>Loading...</p>
             ) : (
-                <>
+                <div className={styles.HomePageDiv}>
                     {allDecks.map((deck) => (
-                        <Link
-                            className={styles.DeckLink}
-                            to={`/deck/${deck.id}`}
-                            key={deck.id}
-                        >
-                            <p>{`${deck.id}: ${deck.name}`}</p>
-                        </Link>
+                        <div className={classNames(styles.HomePageRow)}>
+                            <Link
+                                to={`/deck/${deck.id}`}
+                                className={styles.DeckLink}
+                                key={deck.id}
+                            >
+                                {`${deck.id}: ${deck.name}`}
+                            </Link>
+                            <Link to={`/edit/${deck.id}`} className={classNames(styles.DeckLink)}>edit</Link>
+                        </div>
                     ))}
-                    <Link className={styles.DeckLink} to={`/edit/new`}>
+                    <Link to={`/edit/new`} className={styles.DeckLink}>
                         new deck
                     </Link>
-                </>
+                </div>
             )}
         </>
     );

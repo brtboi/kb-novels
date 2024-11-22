@@ -29,7 +29,6 @@ export default function EditCategoryHeader({
         useState<boolean>(false);
 
     useEffect(() => {
-        console.log("ji");
         category._dependencies.forEach((categoryID) => {
             if (!Object.keys(categoryDict).includes(categoryID))
                 toggleDependency(categoryID);
