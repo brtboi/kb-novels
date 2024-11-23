@@ -3,6 +3,7 @@
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
+    gap: 1rem;
 }
 
 .InputCategory {
@@ -12,17 +13,18 @@
 
 .InputRow {
     display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    overflow: hidden;
 }
 
 .Label {
-    margin: var(--marginSize);
     width: 30%;
 
     text-align: right;
 }
 
 .Input {
-    margin: var(--marginSize);
     width: 70%;
     background-color: transparent;
     outline: none;
@@ -33,7 +35,6 @@
 }
 
 .Answer {
-    margin: var(--marginSize);
     width: 70%;
 }
 

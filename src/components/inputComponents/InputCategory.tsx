@@ -6,7 +6,6 @@ interface Props {
     category: CardCategory;
     inputRefs: React.RefObject<HTMLInputElement>[];
     rowStates: STATE[];
-    startIndex: number;
     updateCategoryStates: (newState: boolean) => void;
     handleKeyDown: (
         inputIndex: number,
@@ -19,19 +18,17 @@ export default function InputCategory({
     category,
     inputRefs,
     rowStates,
-    startIndex,
     updateCategoryStates,
     handleKeyDown,
 }: Props) {
+    //
     useEffect(() => {
-        if (
-            rowStates
-                .slice(startIndex, startIndex + category.rows.length)
-                .every((state) => state !== STATE.ASK)
-        ) {
+        if (rowStates.length > 0 && rowStates.every((state) => state !== STATE.ASK)) {
             updateCategoryStates(true);
+        } else {
+            updateCategoryStates(false);
         }
-    }, []);
+    }, [rowStates]);
 
     return (
         <>
@@ -41,10 +38,10 @@ export default function InputCategory({
                         row={row}
                         state={rowStates[rowIndex]}
                         handleKeyDown={(e) => {
-                            handleKeyDown(startIndex + rowIndex, e, row);
+                            handleKeyDown(rowIndex, e, row);
                         }}
                         ref={inputRefs[rowIndex]}
-                        key={`row ${startIndex + rowIndex}`}
+                        key={`${category._ID} row ${rowIndex}`}
                     />
                 );
             })}

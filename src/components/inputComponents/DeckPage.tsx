@@ -4,6 +4,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase.ts";
 import { useParams } from "react-router-dom";
 import InputCategory from "./InputCategory.tsx";
+import classNames from "classnames";
+import styles from "./inputStyles.module.css";
 
 interface CardBoxes {
     box0: number[];
@@ -29,7 +31,9 @@ export default function DeckPage() {
 
     const inputRefs = useRef<React.RefObject<HTMLInputElement>[]>([]);
 
-    const [categoryStates, setCategoryStates] = useState<boolean[]>([]);
+    const [categoryStates, setCategoryStates] = useState<
+        Record<string, boolean>
+    >({});
     const [rowStates, setRowStates] = useState<STATE[]>([]);
     const [isCardDone, setIsCardDone] = useState<boolean>(false);
 
@@ -58,13 +62,16 @@ export default function DeckPage() {
         if (cards) {
             inputRefs.current = [];
             setRowStates([]);
-            setCategoryStates([]);
+            setCategoryStates({});
             cards[cardIndex].categories.forEach((category) => {
                 category.rows.forEach(() => {
                     inputRefs.current.push(createRef<HTMLInputElement>());
                     setRowStates((prev) => [...prev, STATE.ASK]);
                 });
-                setCategoryStates((prev) => [...prev, false]);
+                setCategoryStates((prev) => ({
+                    ...prev,
+                    [category._ID]: false,
+                }));
             });
 
             setUpdateVariable((prev) => prev + 1);
@@ -101,14 +108,9 @@ export default function DeckPage() {
         let nextIndex =
             (inputIndex + inputRefs.current.length + step) %
             inputRefs.current.length;
-
+        console.log("from while loop", nextIndex, rowStates[nextIndex]);
         while (nextIndex !== inputIndex && rowStates[nextIndex] !== STATE.ASK) {
-            console.log(
-                "hi from while",
-                inputIndex,
-                nextIndex,
-                rowStates[nextIndex]
-            );
+            console.log("from while loop", rowStates[nextIndex]);
             nextIndex =
                 (nextIndex + inputRefs.current.length + step) %
                 inputRefs.current.length;
@@ -131,12 +133,14 @@ export default function DeckPage() {
         });
     };
 
-    const updateCategoryStates = (categoryIndex: number, newState: boolean) => {
-        setCategoryStates((prev) => {
-            const newCategoryStates = structuredClone(prev);
-            newCategoryStates[categoryIndex] = newState;
-            return newCategoryStates;
-        });
+    const updateCategoryStates = (categoryID: string, newState: boolean) => {
+        if (newState !== categoryStates[categoryID]) {
+            setCategoryStates((prev) => {
+                const newCategoryStates = structuredClone(prev);
+                newCategoryStates[categoryID] = newState;
+                return newCategoryStates;
+            });
+        }
     };
 
     const handleKeyDown = (
@@ -188,40 +192,64 @@ export default function DeckPage() {
     return (
         <>
             {cards !== null ? (
-                <>
+                <div className={classNames(styles.InputBody)}>
                     {cards[cardIndex].categories.map(
                         (category, categoryIndex) => {
                             const thisStartIndex = startIndex;
                             startIndex += category.rows.length;
 
-                            return (
-                                <InputCategory
-                                    category={category}
-                                    inputRefs={inputRefs.current.slice(
-                                        thisStartIndex,
-                                        startIndex
-                                    )}
-                                    rowStates={rowStates.slice(
-                                        thisStartIndex,
-                                        startIndex
-                                    )}
-                                    startIndex={thisStartIndex}
-                                    updateCategoryStates={(
-                                        newState: boolean
-                                    ) => {
-                                        updateCategoryStates(
-                                            categoryIndex,
-                                            newState
-                                        );
-                                    }}
-                                    handleKeyDown={handleKeyDown}
-                                    key={`category ${categoryIndex}`}
-                                />
-                            );
+                            if (
+                                category._dependencies.every((ID) => {
+                                    return categoryStates[ID] === true;
+                                })
+                            ) {
+                                return (
+                                    <InputCategory
+                                        category={category}
+                                        inputRefs={inputRefs.current.slice(
+                                            thisStartIndex,
+                                            startIndex
+                                        )}
+                                        rowStates={rowStates.slice(
+                                            thisStartIndex,
+                                            startIndex
+                                        )}
+                                        updateCategoryStates={(
+                                            newState: boolean
+                                        ) => {
+                                            updateCategoryStates(
+                                                category._ID,
+                                                newState
+                                            );
+                                        }}
+                                        handleKeyDown={(
+                                            rowIndex: number,
+                                            event: React.KeyboardEvent<HTMLInputElement>,
+                                            row: CardRow
+                                        ) => {
+                                            handleKeyDown(
+                                                thisStartIndex + rowIndex,
+                                                event,
+                                                row
+                                            );
+                                        }}
+                                        key={`category ${categoryIndex}`}
+                                    />
+                                );
+                            } else {
+                                return null;
+                            }
                         }
                     )}
                     <button onClick={getNextCard}>next Card</button>
-                </>
+                    <button
+                        onClick={() => {
+                            console.log(categoryStates);
+                        }}
+                    >
+                        cateStates
+                    </button>
+                </div>
             ) : (
                 <p>Loading...</p>
             )}
