@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import classNames from "classnames";
 import styles from "./editStyles.module.css";
-import { CardCategory, CardRow, ROWTYPE } from "../../entity/types";
+import { CardCategory, CardRow } from "../../entity/types";
 import EditRow from "./EditRow";
 import EditCategoryHeader from "./EditCategoryHeader";
 

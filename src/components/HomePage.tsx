@@ -2,12 +2,11 @@ import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { Deck } from "../entity/types";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import styles from "./homePageStyles.module.css";
 import classNames from "classnames";
 
 export default function HomePage() {
-    const navigate = useNavigate();
 
     const [allDecks, setAllDecks] = useState<Deck[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -41,11 +40,10 @@ export default function HomePage() {
             ) : (
                 <div className={styles.HomePageDiv}>
                     {allDecks.map((deck) => (
-                        <div className={classNames(styles.HomePageRow)}>
+                        <div className={classNames(styles.HomePageRow)} key={deck.id}>
                             <Link
                                 to={`/deck/${deck.id}`}
                                 className={styles.DeckLink}
-                                key={deck.id}
                             >
                                 {`${deck.id}: ${deck.name}`}
                             </Link>

@@ -1,12 +1,5 @@
 import { createContext } from "react";
-import { Card, InputNodeList } from "./types.ts";
-
-interface InputContextType {
-    inputNodeListRef: React.MutableRefObject<InputNodeList>;
-}
-
-export const InputContext = createContext<InputContextType | null>(null);
-
+import { Card } from "./types.ts";
 
 interface EditContextType {
     templateRef: React.MutableRefObject<Card | null>

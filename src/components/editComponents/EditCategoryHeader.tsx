@@ -7,7 +7,7 @@ import { ReactComponent as IsSequentialIcon } from "../../assets/Icons/123.svg";
 import { ReactComponent as IsShuffledIcon } from "../../assets/Icons/Shuffle.svg";
 import { ReactComponent as DeleteIcon } from "../../assets/Icons/Delete.svg";
 import { CardCategory, CardRow, ROWTYPE } from "../../entity/types";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface Props {
     category: CardCategory;
@@ -27,13 +27,6 @@ export default function EditCategoryHeader({
 
     const [isDependenciesDrawerOpen, setIsDependenciesDrawerOpen] =
         useState<boolean>(false);
-
-    useEffect(() => {
-        category._dependencies.forEach((categoryID) => {
-            if (!Object.keys(categoryDict).includes(categoryID))
-                toggleDependency(categoryID);
-        });
-    }, [categoryDict]);
 
     const handleCategoryNameOnBlur = () => {
         updateCategory({ ...category, name: categoryName });
@@ -57,12 +50,12 @@ export default function EditCategoryHeader({
         updateCategory({ ...category, rows: [...category.rows, newRow] });
     };
 
-    const toggleDependency = (categoryID: string) => {
+    const toggleDependency = useCallback((categoryID: string) => {
         const updatedDependencies = category._dependencies.includes(categoryID)
             ? category._dependencies.filter((e) => e !== categoryID)
             : [...category._dependencies, categoryID];
         updateCategory({ ...category, _dependencies: updatedDependencies });
-    };
+    }, [category, updateCategory]);
 
     const ToggleIsSequential = () => {
         updateCategory({ ...category, _isSequential: !category._isSequential });
@@ -71,6 +64,14 @@ export default function EditCategoryHeader({
     const ToggleIsShuffled = () => {
         updateCategory({ ...category, _isShuffled: !category._isShuffled });
     };
+
+    useEffect(() => {
+        category._dependencies.forEach((categoryID) => {
+            if (!Object.keys(categoryDict).includes(categoryID))
+                toggleDependency(categoryID);
+        });
+    }, [categoryDict, category._dependencies, toggleDependency]);
+
     return (
         <div className={classNames(styles.CategoryHeader)}>
             <input
