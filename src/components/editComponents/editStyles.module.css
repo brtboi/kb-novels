@@ -17,13 +17,13 @@ button {
     justify-content: space-around;
     align-items: center;
     overflow: hidden;
-    transition: background-color 100ms ease-in;
+    transition: background-color 100ms;
     fill: var(--fontColor);
 }
 
 .SettingsButton:hover {
-    background-color: rgb(100, 100, 100);
-    transition: background-color 100ms ease-in;
+    background-color: var(--hoverColor);
+    transition: background-color 100ms;
 }
 
 .SettingsButton.toggleOn {
@@ -48,10 +48,49 @@ button {
     text-decoration: underline;
 }
 
-.CardCategory {
+.Card {
+    display: flex;
+    flex-direction: row;
+}
+
+.CardSidePanel {
+    width: 2rem;
+    overflow: hidden;
+}
+
+.CardSidePanel .SettingsButton {
+    height: 1em;
+    aspect-ratio: 1;
+    transition: all 100ms;
+}
+
+.CardSidePanel .SettingsButton:hover {
+    background-color: var(--hoverColor);
+    transition: all 100ms;
+}
+
+.CardSidePanel .SettingsButton.toggleOn {
+    background-color: var(--backgroundColor);
+    transform: rotate(-90deg);
+    transition: all 100ms;
+}
+
+.CardSidePanel .SettingsButton.toggleOn:hover {
+    background-color: var(--hoverColor);
+    transition: all 100ms;
+}
+
+.CardCategoriesDiv {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    margin: var(--marginSize);
+    gap: 1rem;
+}
+
+.CardCategory {
+    position: relative;
+    display: flex;
+    flex-direction: column;
     border: 4px solid var(--fontColor);
     padding: 1rem;
     border-radius: 1rem;

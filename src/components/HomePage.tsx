@@ -7,7 +7,6 @@ import styles from "./homePageStyles.module.css";
 import classNames from "classnames";
 
 export default function HomePage() {
-
     const [allDecks, setAllDecks] = useState<Deck[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -40,19 +39,28 @@ export default function HomePage() {
             ) : (
                 <div className={styles.HomePageDiv}>
                     {allDecks.map((deck) => (
-                        <div className={classNames(styles.HomePageRow)} key={deck.id}>
+                        <div
+                            className={classNames(styles.HomePageRow)}
+                            key={deck.id}
+                        >
                             <Link
                                 to={`/deck/${deck.id}`}
                                 className={styles.DeckLink}
                             >
                                 {`${deck.id}: ${deck.name}`}
                             </Link>
-                            <Link to={`/edit/${deck.id}`} className={classNames(styles.DeckLink)}>edit</Link>
+                            <Link
+                                to={`/edit/${deck.id}`}
+                                className={classNames(styles.DeckLink)}
+                            >
+                                edit
+                            </Link>
                         </div>
                     ))}
                     <Link to={`/edit/new`} className={styles.DeckLink}>
                         new deck
                     </Link>
+                    <Link to={`/test`} className={styles.DeckLink}>Test page</Link>
                 </div>
             )}
         </>

@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardCategory } from "../../entity/types";
 import EditCategory from "./EditCategory";
 import { ReactComponent as DeleteIcon } from "../../assets/Icons/Delete.svg";
+import { ReactComponent as DropDownIcon } from "../../assets/Icons/DropDown.svg";
 import styles from "./editStyles.module.css";
 import classNames from "classnames";
 
@@ -29,6 +30,8 @@ export default function EditCard({
     isTemplate,
 }: Props) {
     //
+    const [isCondensed, setIsCondensed] = useState<boolean>(false);
+
     const categoryDict: Record<string, string> = Object.fromEntries(
         card.categories.map((category) => [category._ID, category.name])
     );
@@ -69,34 +72,85 @@ export default function EditCard({
 
     return (
         <>
-            {!isTemplate && (
-                <p style={{display: "flex"}}>
-                    {`Card ${cardIndex}`} |{" "}
+            <div className={classNames(styles.Card)}>
+                <div className={classNames(styles.CardSidePanel)}>
                     <button
-                        onClick={deleteCard}
-                        className={classNames(styles.SettingsButton)}
+                        onClick={() => {
+                            setIsCondensed((prev) => !prev);
+                        }}
+                        className={classNames(styles.SettingsButton, {
+                            [styles.toggleOn]: isCondensed,
+                        })}
                     >
-                        <DeleteIcon className={classNames(styles.Icon)} />
+                        <DropDownIcon className={classNames(styles.Icon)} />
                     </button>
-                </p>
-            )}
-            {card.categories.map((category, categoryIndex) => {
-                return (
-                    <EditCategory
-                        category={category}
-                        updateCategory={(newCategory) => {
-                            handleUpdateCategory(categoryIndex, newCategory);
-                        }}
-                        deleteCategory={() => {
-                            deleteCategory(categoryIndex);
-                        }}
-                        isTemplate={isTemplate}
-                        categoryDict={categoryDict}
-                        key={`category ${category.name} | ${categoryIndex}`}
-                    />
-                );
-            })}
-            <button onClick={handleAddCategory}>add category</button>
+                </div>
+                {isCondensed ? (
+                    <div>
+                        {isTemplate ? (
+                            <p>Template</p>
+                        ) : (
+                            <p style={{ display: "flex" }}>
+                                {`Card ${cardIndex} | `}
+                                <button
+                                    onClick={deleteCard}
+                                    className={classNames(
+                                        styles.SettingsButton
+                                    )}
+                                >
+                                    <DeleteIcon
+                                        className={classNames(styles.Icon)}
+                                    />
+                                </button>
+
+                                {` | ${card.categories[0].rows[0].label}: ${card.categories[0].rows[0].answers[0]}`}
+                            </p>
+                        )}
+                    </div>
+                ) : (
+                    <div className={classNames(styles.CardCategoriesDiv)}>
+                        {isTemplate ? (
+                            <p>Template:</p>
+                        ) : (
+                            <p style={{ display: "flex" }}>
+                                {`Card ${cardIndex}`} |
+                                <button
+                                    onClick={deleteCard}
+                                    className={classNames(
+                                        styles.SettingsButton
+                                    )}
+                                >
+                                    <DeleteIcon
+                                        className={classNames(styles.Icon)}
+                                    />
+                                </button>
+                            </p>
+                        )}
+                        {card.categories.map((category, categoryIndex) => {
+                            return (
+                                <EditCategory
+                                    category={category}
+                                    updateCategory={(newCategory) => {
+                                        handleUpdateCategory(
+                                            categoryIndex,
+                                            newCategory
+                                        );
+                                    }}
+                                    deleteCategory={() => {
+                                        deleteCategory(categoryIndex);
+                                    }}
+                                    isTemplate={isTemplate}
+                                    categoryDict={categoryDict}
+                                    key={`category ${category.name} | ${categoryIndex}`}
+                                />
+                            );
+                        })}
+                        <button onClick={handleAddCategory}>
+                            add category
+                        </button>
+                    </div>
+                )}
+            </div>
         </>
     );
 }

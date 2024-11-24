@@ -106,7 +106,6 @@ export default function EditPage() {
                         />
                     </p>
 
-                    <p>Template:</p>
                     <EditCard
                         card={templateCard}
                         cardIndex={0}
@@ -114,6 +113,8 @@ export default function EditPage() {
                         isTemplate={true}
                     />
                     <p>Cards:</p>
+
+
                     {cards.map((card, cardIndex) => (
                         <EditCard
                             card={card}
@@ -128,6 +129,8 @@ export default function EditPage() {
                             key={`card ${cardIndex}`}
                         />
                     ))}
+
+                    
                     <button onClick={addCard}>add Card</button>
                     <button
                         onClick={() => {

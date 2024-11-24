@@ -10,6 +10,7 @@
     --marginSize: 0.5rem;
 
     --backgroundColor: #232427;
+    --hoverColor: #606060;
     --primaryColor: #d67e0b;
     --secondaryColor: #1481ba;
 
@@ -17,14 +18,14 @@
     --fontSize: 24px;
     --fontWeight: 700;
     --fontColor: #ebebeb;
-    --fontColorSecondary: #919191;
+    --fontColorSecondary: #a0a0a0;
 }
 
 * {
     margin: 0px;
     border: none;
     padding: 0px;
-    overflow: auto;
+    overflow: visible;
     box-sizing: border-box;
     outline: none;
 }
