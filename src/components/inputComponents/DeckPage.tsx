@@ -23,8 +23,7 @@ interface CardBoxes {
 export default function DeckPage() {
     const { deckId } = useParams<{ deckId: string }>();
 
-    // const [shouldFocusFirstInput, setShouldFocusFirstInput] =
-    //     useState<boolean>(false);
+    const [isFirstLoaded, setIsFirstLoaded] = useState<boolean>(false);
 
     const [cards, setCards] = useState<Card[] | null>(null);
     const [cardIndex, setCardIndex] = useState<number>(0);
@@ -71,15 +70,10 @@ export default function DeckPage() {
             categoryID: string,
             rowIndex: number,
             step: -1 | 1,
-            isRowAnswered: boolean,
-            _inputRefs: Map<
-                string,
-                React.RefObject<HTMLInputElement>[]
-            > = inputRefs.current,
-            _rowStates: Map<string, STATE[]> = rowStates
+            isRowAnswered: boolean
         ) => {
-            const inputRefsFlat = Array.from(_inputRefs.values()).flat();
-            const rowStatesFlat = Array.from(_rowStates.values()).flat();
+            const inputRefsFlat = Array.from(inputRefs.current.values()).flat();
+            const rowStatesFlat = Array.from(rowStates.values()).flat();
 
             const flatIndex = getFlatIndex(categoryID, rowIndex);
 
@@ -178,10 +172,8 @@ export default function DeckPage() {
 
                 return updatedRowStates;
             });
-            return updatedRowStates;
         } else {
             console.error("Error checking dependencies. cards is null");
-            throw new Error("cannot check dependencies. cards is null");
         }
     }, [cards, cardIndex]);
 
@@ -279,24 +271,27 @@ export default function DeckPage() {
 
             inputRefs.current = new Map(_inputRefs);
             setRowStates(new Map(_rowStates));
-            _rowStates = checkDependencies();
+            checkDependencies();
 
-            setTimeout(() => {
-                const lastCategory =
-                    cards[cardIndex].categories[
-                        cards[cardIndex].categories.length - 1
-                    ];
-                focusNextInput(
-                    lastCategory._ID,
-                    lastCategory.rows.length - 1,
-                    1,
-                    false,
-                    _inputRefs,
-                    _rowStates
-                );
-            }, 50);
+            setIsFirstLoaded(true);
         }
     }, [cards, cardIndex, checkDependencies]);
+
+    useEffect(() => {
+        if (isFirstLoaded && cards !== null) {
+            const lastCategory =
+                cards[cardIndex].categories[
+                    cards[cardIndex].categories.length - 1
+                ];
+            focusNextInput(
+                lastCategory._ID,
+                lastCategory.rows.length - 1,
+                1,
+                false
+            );
+            setIsFirstLoaded(false);
+        }
+    }, [cardIndex, cards, focusNextInput, isFirstLoaded]);
 
     // global key down event listener for enter
     useEffect(() => {
