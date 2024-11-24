@@ -18,6 +18,10 @@
     overflow: hidden;
 }
 
+.InputRow.hide {
+    display: none;
+}
+
 .Label {
     width: 30%;
 

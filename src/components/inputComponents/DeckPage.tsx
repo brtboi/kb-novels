@@ -23,8 +23,8 @@ interface CardBoxes {
 export default function DeckPage() {
     const { deckId } = useParams<{ deckId: string }>();
 
-    const [shouldFocusFirstInput, setShouldFocusFirstInput] =
-        useState<boolean>(false);
+    // const [shouldFocusFirstInput, setShouldFocusFirstInput] =
+    //     useState<boolean>(false);
 
     const [cards, setCards] = useState<Card[] | null>(null);
     const [cardIndex, setCardIndex] = useState<number>(0);
@@ -71,10 +71,15 @@ export default function DeckPage() {
             categoryID: string,
             rowIndex: number,
             step: -1 | 1,
-            isRowAnswered: boolean
+            isRowAnswered: boolean,
+            _inputRefs: Map<
+                string,
+                React.RefObject<HTMLInputElement>[]
+            > = inputRefs.current,
+            _rowStates: Map<string, STATE[]> = rowStates
         ) => {
-            const inputRefsFlat = Array.from(inputRefs.current.values()).flat();
-            const rowStatesFlat = Array.from(rowStates.values()).flat();
+            const inputRefsFlat = Array.from(_inputRefs.values()).flat();
+            const rowStatesFlat = Array.from(_rowStates.values()).flat();
 
             const flatIndex = getFlatIndex(categoryID, rowIndex);
 
@@ -86,6 +91,7 @@ export default function DeckPage() {
                 nextIndex !== flatIndex &&
                 rowStatesFlat[nextIndex] !== STATE.ASK
             ) {
+                console.log("in the while loop");
                 nextIndex =
                     (nextIndex + inputRefsFlat.length + step) %
                     inputRefsFlat.length;
@@ -109,14 +115,75 @@ export default function DeckPage() {
     ) => {
         setRowStates((prev) => {
             const updatedRowStates = new Map(prev);
-            const updatedRowStatesRow = prev.get(categoryID)!;
+            const updatedRowStatesCategory = prev.get(categoryID)!;
 
-            updatedRowStatesRow[rowIndex] = newState;
+            updatedRowStatesCategory[rowIndex] = newState;
 
-            updatedRowStates.set(categoryID, updatedRowStatesRow);
+            updatedRowStates.set(categoryID, updatedRowStatesCategory);
             return updatedRowStates;
         });
+        checkDependencies();
     };
+
+    // const updateCategoryState = (categoryID: string, newState: STATE) => {
+    //     setRowStates((prev) => {
+    //         const updatedRowStates = new Map(prev);
+    //         const updatedRowStatesCategory = prev
+    //             .get(categoryID)!
+    //             .map((_) => newState);
+    //         updatedRowStates.set(categoryID, updatedRowStatesCategory);
+    //         return updatedRowStates;
+    //     });
+    // };
+
+    const checkDependencies = useCallback(() => {
+        if (cards) {
+            const updatedRowStates = new Map<string, STATE[]>();
+
+            setRowStates((prev) => {
+                const categoryStates = prev.entries().reduce(
+                    (acc, [categoryID, states]) => ({
+                        ...acc,
+                        [categoryID]: states.every(
+                            (e) => e !== STATE.ASK && e !== STATE.HIDE
+                        ),
+                    }),
+                    {} as Record<string, boolean>
+                );
+                const dependencies = cards[cardIndex].categories.reduce(
+                    (acc, category) => ({
+                        ...acc,
+                        [category._ID]: category._dependencies,
+                    }),
+                    {} as Record<string, string[]>
+                );
+
+                prev.keys().forEach((categoryID) => {
+                    if (
+                        prev
+                            .get(categoryID)
+                            ?.every((state) => state === STATE.HIDE) &&
+                        dependencies[categoryID].every(
+                            (dependencyID) => categoryStates[dependencyID]
+                        )
+                    ) {
+                        updatedRowStates.set(
+                            categoryID,
+                            prev.get(categoryID)!.map(() => STATE.ASK)
+                        );
+                    } else {
+                        updatedRowStates.set(categoryID, prev.get(categoryID)!);
+                    }
+                });
+
+                return updatedRowStates;
+            });
+            return updatedRowStates;
+        } else {
+            console.error("Error checking dependencies. cards is null");
+            throw new Error("cannot check dependencies. cards is null");
+        }
+    }, [cards, cardIndex]);
 
     const handleKeyDown = (
         categoryID: string,
@@ -193,49 +260,43 @@ export default function DeckPage() {
         fetchCards();
     }, [deckId]);
 
-    // Define inputRefs, rowStates
+    // Initialize inputRefs & rowStates
     useEffect(() => {
         if (cards) {
-            inputRefs.current = new Map();
-            // setRowStates([]);
-            // setCategoryStates({});
-            setRowStates(new Map());
+            const _inputRefs = new Map();
+            let _rowStates = new Map();
 
             cards[cardIndex].categories.forEach((category) => {
-                setRowStates((prev) => {
-                    const updatedRowStates = new Map(prev);
-
-                    updatedRowStates.set(
-                        category._ID,
-                        category.rows.map((_) => STATE.ASK)
-                    );
-
-                    return updatedRowStates;
-                });
-
-                inputRefs.current.set(
+                _inputRefs.set(
                     category._ID,
-                    category.rows.map((_) => createRef<HTMLInputElement>())
+                    category.rows.map(() => createRef<HTMLInputElement>())
+                );
+                _rowStates.set(
+                    category._ID,
+                    category.rows.map(() => STATE.HIDE)
                 );
             });
 
-            setShouldFocusFirstInput(true);
-        }
-    }, [cards, cardIndex]);
+            inputRefs.current = new Map(_inputRefs);
+            setRowStates(new Map(_rowStates));
+            _rowStates = checkDependencies();
 
-    // focus first input
-    useEffect(() => {
-        if (
-            shouldFocusFirstInput &&
-            cards !== null &&
-            inputRefs.current.size !== 0 &&
-            rowStates.size !== 0
-        ) {
-            const firstCategoryID = Array.from(inputRefs.current.keys())[0];
-            focusNextInput(firstCategoryID, -1, 1, false);
-            setShouldFocusFirstInput(false);
+            setTimeout(() => {
+                const lastCategory =
+                    cards[cardIndex].categories[
+                        cards[cardIndex].categories.length - 1
+                    ];
+                focusNextInput(
+                    lastCategory._ID,
+                    lastCategory.rows.length - 1,
+                    1,
+                    false,
+                    _inputRefs,
+                    _rowStates
+                );
+            }, 50);
         }
-    }, [cards, cardIndex, focusNextInput, rowStates.size]);
+    }, [cards, cardIndex, checkDependencies]);
 
     // global key down event listener for enter
     useEffect(() => {

@@ -4,6 +4,7 @@ export enum STATE {
     HIDE = "hide",
     CORRECT = "correct",
     INCORRECT = "incorrect",
+    DISABLE = "disable",
 }
 
 export enum ROWTYPE {

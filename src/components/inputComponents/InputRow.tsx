@@ -12,7 +12,12 @@ interface Props {
 export default React.forwardRef<HTMLInputElement, Props>(
     ({ row, state, handleKeyDown }, ref) => {
         return (
-            <div className={styles.InputRow}>
+            <div
+                className={classNames(styles.InputRow, {
+                    [styles.hide]:
+                        state === STATE.HIDE || state === STATE.DISABLE,
+                })}
+            >
                 <label className={styles.Label}>{`${row.label}:`}</label>
                 {state === STATE.ASK && (
                     <input
