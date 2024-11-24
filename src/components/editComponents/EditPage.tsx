@@ -6,6 +6,12 @@ import { db } from "../../firebase/firebase";
 import EditCard from "./EditCard";
 import classNames from "classnames";
 import styles from "./editStyles.module.css";
+import {
+    DragDropContext,
+    Draggable,
+    Droppable,
+    DropResult,
+} from "@hello-pangea/dnd";
 
 export default function EditPage() {
     const { deckId } = useParams<{ deckId: string }>();
@@ -91,6 +97,20 @@ export default function EditPage() {
         });
     };
 
+    const handleCardsDragEnd = (result: DropResult<string>) => {
+        const { destination, source } = result;
+
+        if (!destination) return; // Dropped outside a valid destination
+        if (destination.index === source.index) return; // No change in position
+
+        setCards((prev) => {
+            const updatedCards = structuredClone(prev!);
+            const [movedCard] = updatedCards.splice(source.index, 1);
+            updatedCards.splice(destination.index, 0, movedCard);
+            return updatedCards;
+        });
+    };
+
     return (
         <>
             {deckName !== null && templateCard !== null && cards !== null ? (
@@ -114,8 +134,57 @@ export default function EditPage() {
                     />
                     <p>Cards:</p>
 
+                    <DragDropContext onDragEnd={handleCardsDragEnd}>
+                        <Droppable droppableId="CardsDroppable">
+                            {(provided) => (
+                                <div
+                                    {...provided.droppableProps}
+                                    ref={provided.innerRef}
+                                >
+                                    {cards.map((card, cardIndex) => (
+                                        <Draggable
+                                            index={cardIndex}
+                                            draggableId={`Card ${cardIndex}`}
+                                            key={`Card ${cardIndex}`}
+                                        >
+                                            {(provided) => (
+                                                <div
+                                                    {...provided.draggableProps}
+                                                    ref={provided.innerRef}
+                                                >
+                                                    <EditCard
+                                                        card={card}
+                                                        cardIndex={cardIndex}
+                                                        updateCard={(
+                                                            newCard: Card
+                                                        ) => {
+                                                            updateCard(
+                                                                cardIndex,
+                                                                newCard
+                                                            );
+                                                        }}
+                                                        deleteCard={() => {
+                                                            deleteCard(
+                                                                cardIndex
+                                                            );
+                                                        }}
+                                                        isTemplate={false}
+                                                        dragHandleProps={
+                                                            provided.dragHandleProps
+                                                        }
+                                                        key={`card ${cardIndex}`}
+                                                    />
+                                                </div>
+                                            )}
+                                        </Draggable>
+                                    ))}
+                                    {provided.placeholder}
+                                </div>
+                            )}
+                        </Droppable>
+                    </DragDropContext>
 
-                    {cards.map((card, cardIndex) => (
+                    {/* {cards.map((card, cardIndex) => (
                         <EditCard
                             card={card}
                             cardIndex={cardIndex}
@@ -128,9 +197,8 @@ export default function EditPage() {
                             isTemplate={false}
                             key={`card ${cardIndex}`}
                         />
-                    ))}
+                    ))} */}
 
-                    
                     <button onClick={addCard}>add Card</button>
                     <button
                         onClick={() => {

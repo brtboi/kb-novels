@@ -3,8 +3,10 @@ import { Card, CardCategory } from "../../entity/types";
 import EditCategory from "./EditCategory";
 import { ReactComponent as DeleteIcon } from "../../assets/Icons/Delete.svg";
 import { ReactComponent as DropDownIcon } from "../../assets/Icons/DropDown.svg";
+import { ReactComponent as ReorderIcon } from "../../assets/Icons/Reorder.svg";
 import styles from "./editStyles.module.css";
 import classNames from "classnames";
+import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 
 type Props =
     | {
@@ -13,6 +15,7 @@ type Props =
           updateCard: (newCard: Card) => void;
           deleteCard?: never;
           isTemplate: true;
+          dragHandleProps?: never;
       }
     | {
           card: Card;
@@ -20,6 +23,7 @@ type Props =
           updateCard: (newCard: Card) => void;
           deleteCard: () => void;
           isTemplate: false;
+          dragHandleProps: DraggableProvidedDragHandleProps | null;
       };
 
 export default function EditCard({
@@ -28,6 +32,7 @@ export default function EditCard({
     updateCard,
     deleteCard,
     isTemplate,
+    dragHandleProps,
 }: Props) {
     //
     const [isCondensed, setIsCondensed] = useState<boolean>(false);
@@ -74,6 +79,14 @@ export default function EditCard({
         <>
             <div className={classNames(styles.Card)}>
                 <div className={classNames(styles.CardSidePanel)}>
+                    {!isTemplate && (
+                        <button
+                            {...dragHandleProps}
+                            className={classNames(styles.SettingsButton)}
+                        >
+                            <ReorderIcon className={classNames(styles.Icon)} />
+                        </button>
+                    )}
                     <button
                         onClick={() => {
                             setIsCondensed((prev) => !prev);

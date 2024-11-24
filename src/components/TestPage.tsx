@@ -12,12 +12,6 @@ import { db } from "../firebase/firebase";
 export default function TestPage() {
     const [cards, setCards] = useState<Card[] | null>(null);
 
-    const [items, setItems] = useState([
-        { id: "1", content: "Item 1" },
-        { id: "2", content: "Item 2" },
-        { id: "3", content: "Item 3" },
-    ]);
-
     const handleDragEnd = (result: DropResult<string>) => {
         const { destination, source } = result;
 
