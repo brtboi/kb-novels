@@ -17,6 +17,7 @@ button {
     justify-content: space-around;
     align-items: center;
     overflow: hidden;
+    background-color: var(--backgroundColor);
     transition: background-color 100ms;
     fill: var(--fontColor);
 }
@@ -183,6 +184,7 @@ button {
 }
 
 .CategorySettingsDiv {
+    height: 1rem;
     display: flex;
     flex-direction: row;
     gap: 1rem;
@@ -242,11 +244,42 @@ button {
     margin: 6px 0 0 0;
     width: 2rem;
     height: 2rem;
-    align-self: top;
 }
 
 .CardRow .SettingsButton {
     width: 2rem;
     height: 2rem;
     align-self: center;
+}
+
+.RowSettingsDiv {
+    right: 2rem;
+    height: 2rem;
+    margin: 6px 1rem 0 auto;
+    padding: 0 1rem 0 0;
+    display: flex;
+    justify-content: right;
+
+    border: var(--fontColor) solid 4px;
+    border-radius: 10rem;
+
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.RowSettingsDiv .SettingsButton {
+    height: 1.5rem;
+    width: 1.5rem;
+}
+
+.RowTypeDiv {
+    width: auto;
+    display: flex;
+    gap: 1rem;
+    justify-content: right;
+}
+
+.RowTypeDiv .SettingsButton.toggleOn {
+    z-index: 1;
 }

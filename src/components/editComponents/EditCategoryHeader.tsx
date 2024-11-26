@@ -6,7 +6,7 @@ import { ReactComponent as CheckBoxOn } from "../../assets/Icons/CheckBoxOn.svg"
 import { ReactComponent as IsSequentialIcon } from "../../assets/Icons/123.svg";
 import { ReactComponent as IsShuffledIcon } from "../../assets/Icons/Shuffle.svg";
 import { ReactComponent as DeleteIcon } from "../../assets/Icons/Delete.svg";
-import { CardCategory, CardRow, ROWTYPE } from "../../entity/types";
+import { CardCategory, CardRow } from "../../entity/types";
 import { useCallback, useEffect, useState } from "react";
 
 interface Props {
@@ -43,19 +43,24 @@ export default function EditCategoryHeader({
         const newRow: CardRow = {
             label: `Row_${category.rows.length}`,
             answers: [""],
-            _type: ROWTYPE.STRING,
+            _type: "text",
             _isCaseSensitive: false,
         };
 
         updateCategory({ ...category, rows: [...category.rows, newRow] });
     };
 
-    const toggleDependency = useCallback((categoryID: string) => {
-        const updatedDependencies = category._dependencies.includes(categoryID)
-            ? category._dependencies.filter((e) => e !== categoryID)
-            : [...category._dependencies, categoryID];
-        updateCategory({ ...category, _dependencies: updatedDependencies });
-    }, [category, updateCategory]);
+    const toggleDependency = useCallback(
+        (categoryID: string) => {
+            const updatedDependencies = category._dependencies.includes(
+                categoryID
+            )
+                ? category._dependencies.filter((e) => e !== categoryID)
+                : [...category._dependencies, categoryID];
+            updateCategory({ ...category, _dependencies: updatedDependencies });
+        },
+        [category, updateCategory]
+    );
 
     const ToggleIsSequential = () => {
         updateCategory({ ...category, _isSequential: !category._isSequential });
@@ -96,30 +101,27 @@ export default function EditCategoryHeader({
                             (
                                 [categoryID, categoryName],
                                 dependenciesRowIndex
-                            ) => {
-                                return (
-                                    categoryID !== category._ID && (
-                                        <button
-                                            onClick={() => {
-                                                toggleDependency(categoryID);
-                                            }}
-                                            className={classNames(
-                                                styles.DependenciesRow
-                                            )}
-                                            key={`${category.name} dependencies ${dependenciesRowIndex} ${categoryID}`}
-                                        >
-                                            {category._dependencies.includes(
-                                                categoryID
-                                            ) ? (
-                                                <CheckBoxOn />
-                                            ) : (
-                                                <CheckBoxOff />
-                                            )}
-                                            <p>{categoryName}</p>
-                                        </button>
-                                    )
-                                );
-                            }
+                            ) =>
+                                categoryID !== category._ID && (
+                                    <button
+                                        onClick={() => {
+                                            toggleDependency(categoryID);
+                                        }}
+                                        className={classNames(
+                                            styles.DependenciesRow
+                                        )}
+                                        key={`${category.name} dependencies ${dependenciesRowIndex} ${categoryID}`}
+                                    >
+                                        {category._dependencies.includes(
+                                            categoryID
+                                        ) ? (
+                                            <CheckBoxOn />
+                                        ) : (
+                                            <CheckBoxOff />
+                                        )}
+                                        <p>{categoryName}</p>
+                                    </button>
+                                )
                         )}
                     </div>
                 )}

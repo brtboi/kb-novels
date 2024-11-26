@@ -7,16 +7,12 @@ export enum STATE {
     DISABLE = "disable",
 }
 
-export enum ROWTYPE {
-    STRING = "string",
-    NUMBER = "number",
-    YEAR = "year",
-}
+export type RowType = "text" | "name" | "number";
 
 export type CardRow = {
     label: string;
     answers: string[];
-    _type: ROWTYPE;
+    _type: RowType;
     _isCaseSensitive: boolean;
 };
 

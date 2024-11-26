@@ -79,7 +79,9 @@ export default function EditCard({
         <>
             <div className={classNames(styles.Card)}>
                 <div className={classNames(styles.CardSidePanel)}>
-                    {!isTemplate && (
+                    {isTemplate ? (
+                        <div />
+                    ) : (
                         <button
                             {...dragHandleProps}
                             className={classNames(styles.SettingsButton)}
