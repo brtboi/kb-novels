@@ -5,7 +5,7 @@ import React, {
     createRef,
     useCallback,
 } from "react";
-import { Card, CardRow, RowType, STATE } from "../../entity/types.ts";
+import { Card, CardRow, STATE } from "../../entity/types.ts";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase.ts";
 import { useParams } from "react-router-dom";
