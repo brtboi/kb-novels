@@ -5,7 +5,7 @@ import React, {
     createRef,
     useCallback,
 } from "react";
-import { Card, CardRow, STATE } from "../../entity/types.ts";
+import { Card, CardRow, RowType, STATE } from "../../entity/types.ts";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase.ts";
 import { useParams } from "react-router-dom";
@@ -65,6 +65,35 @@ export default function DeckPage() {
         },
         [cards, cardIndex]
     );
+
+    const getIsAnswerCorrect = useCallback((value: string, row: CardRow) => {
+        if (row._type === "name") {
+            const allPossibleNames = [];
+
+            for (const name of row.answers) {
+                const words = name.trim().split(/\s+/); // Split full name into words
+
+                // Generate all viable "last names" for this full name
+                for (let i = 1; i <= words.length; i++) {
+                    allPossibleNames.push(words.slice(-i).join(" "));
+                }
+            }
+
+            return allPossibleNames.some((e) =>
+                row._isCaseSensitive
+                    ? e === value
+                    : e.toUpperCase() === value.toUpperCase()
+            );
+        } else if (row._type === "text") {
+            return row.answers.some((e) =>
+                row._isCaseSensitive
+                    ? e === value
+                    : e.toUpperCase() === value.toUpperCase()
+            );
+        } else if (row._type === "number") {
+            return row.answers.some((e) => parseFloat(e) === parseFloat(value));
+        }
+    }, []);
 
     const focusNextInput = useCallback(
         (
@@ -330,11 +359,7 @@ export default function DeckPage() {
         switch (event.key) {
             case "Enter":
                 event.preventDefault();
-                const isAnswerCorrect = row.answers.some((e) =>
-                    row._isCaseSensitive
-                        ? e === value
-                        : e.toUpperCase() === value.toUpperCase()
-                );
+                const isAnswerCorrect = getIsAnswerCorrect(value, row)
 
                 if (value === "") {
                     focusNextInput(categoryID, rowIndex, 1, false);
