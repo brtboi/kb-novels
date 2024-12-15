@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import classNames from "classnames";
 import styles from "./editStyles.module.css";
 import { CardRow, RowType } from "../../entity/types";
