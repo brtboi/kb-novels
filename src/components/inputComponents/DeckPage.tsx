@@ -78,7 +78,6 @@ export default function DeckPage() {
             setRowStates((prev) => {
                 const flatIndex = getFlatIndex(categoryID, rowIndex);
                 const rowStatesFlat = Array.from(prev.values()).flat();
-                console.log(rowStatesFlat);
 
                 let nextIndex =
                     (flatIndex + inputRefsFlat.length + step) %
@@ -99,8 +98,6 @@ export default function DeckPage() {
                         setIsCardDone(true);
                     }, 10);
                 }
-
-                console.log(nextIndex);
 
                 setTimeout(() => {
                     inputRefsFlat[nextIndex].current?.focus();
@@ -252,7 +249,7 @@ export default function DeckPage() {
         });
     }, [cards, cardIndex]);
 
-    const refillDrawPile = () => {
+    const refillDrawPile = useCallback(() => {
         // move 5 cards to diamonds to clubs
         while (
             cardSuits.current[0].length > 0 &&
@@ -296,9 +293,9 @@ export default function DeckPage() {
                 }))
             );
         }
-    };
+    }, []);
 
-    const getNextCard = () => {
+    const getNextCard = useCallback(() => {
         setIsCardDone(false);
         if (drawPile.current.length === 0) refillDrawPile();
         else {
@@ -321,7 +318,7 @@ export default function DeckPage() {
         }
 
         // setCardIndex(Math.floor(cards!.length * Math.random()));
-    };
+    }, [refillDrawPile]);
 
     const handleKeyDown = (
         categoryID: string,
@@ -396,7 +393,7 @@ export default function DeckPage() {
         };
 
         fetchCards();
-    }, [deckId]);
+    }, [deckId, getNextCard]);
 
     // Initialize inputRefs & rowStates & _dependencies & _isSequential
     useEffect(() => {
@@ -447,7 +444,6 @@ export default function DeckPage() {
     useEffect(() => {
         const handleGlobalKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Enter" && isCardDone) {
-                console.log("hi");
                 getNextCard();
             }
         };
