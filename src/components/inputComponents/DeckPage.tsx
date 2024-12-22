@@ -21,6 +21,13 @@ type DrawPileItem = {
     suitIndex: number;
 };
 
+interface CaretData {
+    active: boolean;
+    top: number;
+    left: number;
+    lastKeyPress: Date | null;
+}
+
 export default function DeckPage() {
     const { deckId } = useParams<{ deckId: string }>();
 
@@ -42,6 +49,17 @@ export default function DeckPage() {
     const [rowStates, setRowStates] = useState<Map<string, STATE[]>>(new Map());
 
     const [isCardDone, setIsCardDone] = useState<boolean>(false);
+
+    const [caretData, setCaretData] = useState<CaretData>({
+        active: false,
+        top: 0,
+        left: 0,
+        lastKeyPress: null,
+    });
+    const rem = parseFloat(
+        window.getComputedStyle(document.documentElement).fontSize
+    );
+    const fontWidth = (rem * 13.203) / 16;
 
     const moveCard = (fromSuit: Suit, suitIndex: number, toSuit: Suit) => {
         const [cardIndex] = cardSuits.current[fromSuit].splice(suitIndex, 1);
@@ -95,47 +113,17 @@ export default function DeckPage() {
         }
     }, []);
 
-    const focusNextInput = useCallback(
-        (
-            categoryID: string,
-            rowIndex: number,
-            step: -1 | 1,
-            isRowAnswered: boolean
-        ) => {
-            const inputRefsFlat = Array.from(inputRefs.current.values()).flat();
-
-            setRowStates((prev) => {
-                const flatIndex = getFlatIndex(categoryID, rowIndex);
-                const rowStatesFlat = Array.from(prev.values()).flat();
-
-                let nextIndex =
-                    (flatIndex + inputRefsFlat.length + step) %
-                    inputRefsFlat.length;
-
-                while (
-                    nextIndex !== flatIndex &&
-                    rowStatesFlat[nextIndex] !== STATE.ASK
-                ) {
-                    console.log("in the while loop");
-                    nextIndex =
-                        (nextIndex + inputRefsFlat.length + step) %
-                        inputRefsFlat.length;
-                }
-
-                if (nextIndex === flatIndex && isRowAnswered) {
-                    setTimeout(() => {
-                        setIsCardDone(true);
-                    }, 10);
-                }
-
-                setTimeout(() => {
-                    inputRefsFlat[nextIndex].current?.focus();
-                });
-                return prev;
+    const moveCaret = (element: HTMLInputElement) => {
+        setTimeout(() => {
+            const rect = element.getBoundingClientRect();
+            setCaretData({
+                active: true,
+                top: rect.top,
+                left: rect.left + (element.selectionStart || 0) * fontWidth,
+                lastKeyPress: new Date()
             });
-        },
-        [getFlatIndex]
-    );
+        }, 2);
+    };
 
     const updateRowState = (
         categoryID: string,
@@ -155,16 +143,77 @@ export default function DeckPage() {
         checkDependencies();
     };
 
-    // const updateCategoryState = (categoryID: string, newState: STATE) => {
-    //     setRowStates((prev) => {
-    //         const updatedRowStates = new Map(prev);
-    //         const updatedRowStatesCategory = prev
-    //             .get(categoryID)!
-    //             .map((_) => newState);
-    //         updatedRowStates.set(categoryID, updatedRowStatesCategory);
-    //         return updatedRowStates;
-    //     });
-    // };
+    const handleOnFocus = (event: React.FocusEvent<HTMLInputElement>) => {
+        moveCaret(event.target);
+    };
+
+    const handleOnBlur = () => {
+        setCaretData((prev) => ({
+            ...prev,
+            active: false,
+        }));
+    };
+
+    const handleOnClick = (
+        event: React.MouseEvent<HTMLInputElement, MouseEvent>
+    ) => {
+        moveCaret(event.currentTarget);
+    };
+
+    const handleKeyDown = (
+        categoryID: string,
+        rowIndex: number,
+        event: React.KeyboardEvent<HTMLInputElement>,
+        row: CardRow
+    ) => {
+        const value = event.currentTarget.value;
+        switch (event.key) {
+            case "Enter":
+                event.preventDefault();
+                const isAnswerCorrect = getIsAnswerCorrect(value, row);
+
+                if (value === "") {
+                    focusNextInput(categoryID, rowIndex, 1, false);
+                    //
+                } else if (isAnswerCorrect) {
+                    inputRefs.current.get(categoryID)![
+                        rowIndex
+                    ].current!.value = "";
+                    updateRowState(categoryID, rowIndex, STATE.CORRECT);
+
+                    focusNextInput(categoryID, rowIndex, 1, isAnswerCorrect);
+                    //
+                } else if (value === "idk") {
+                    inputRefs.current.get(categoryID)![
+                        rowIndex
+                    ].current!.value = "";
+                    cardPerformance.current = -1;
+                    updateRowState(categoryID, rowIndex, STATE.INCORRECT);
+                    focusNextInput(categoryID, rowIndex, 1, true);
+                    //
+                } else {
+                    cardPerformance.current = 0;
+                    inputRefs.current
+                        .get(categoryID)!
+                        [rowIndex].current?.select();
+                }
+
+                break;
+
+            case "ArrowUp":
+                event.preventDefault();
+                focusNextInput(categoryID, rowIndex, -1, false);
+                break;
+
+            case "ArrowDown":
+                event.preventDefault();
+                focusNextInput(categoryID, rowIndex, 1, false);
+                break;
+
+            default:
+                moveCaret(event.currentTarget);
+        }
+    };
 
     const checkIsSequential = useCallback(() => {
         if (!cards) {
@@ -218,14 +267,6 @@ export default function DeckPage() {
                 {} as Record<string, boolean>
             );
 
-            // const dependencies = cards[cardIndex].categories.reduce(
-            //     (acc, category) => ({
-            //         ...acc,
-            //         [category._ID]: category._dependencies,
-            //     }),
-            //     {} as Record<string, string[]>
-            // );
-
             for (const category of cards[cardIndex].categories) {
                 // if the category is currently hidden and all of it's dependencies are fulfilled
                 if (
@@ -254,29 +295,51 @@ export default function DeckPage() {
                 }
             }
 
-            // prev.keys().forEach((categoryID) => {
-            //     // if the category is currently hidden and all of it's dependencies are fulfilled
-            //     if (
-            //         prev
-            //             .get(categoryID)
-            //             ?.every((state) => state === STATE.HIDE) &&
-            //         _dependencies.current[categoryID].every(
-            //             (dependencyID) => categoryStates[dependencyID]
-            //         )
-            //     ) {
-
-            //         updatedRowStates.set(
-            //             categoryID,
-            //             prev.get(categoryID)!.map(() => STATE.ASK)
-            //         );
-            //     } else {
-            //         updatedRowStates.set(categoryID, prev.get(categoryID)!);
-            //     }
-            // });
-
             return updatedRowStates;
         });
     }, [cards, cardIndex]);
+
+    const focusNextInput = useCallback(
+        (
+            categoryID: string,
+            rowIndex: number,
+            step: -1 | 1,
+            isRowAnswered: boolean
+        ) => {
+            const inputRefsFlat = Array.from(inputRefs.current.values()).flat();
+
+            setRowStates((prev) => {
+                const flatIndex = getFlatIndex(categoryID, rowIndex);
+                const rowStatesFlat = Array.from(prev.values()).flat();
+
+                let nextIndex =
+                    (flatIndex + inputRefsFlat.length + step) %
+                    inputRefsFlat.length;
+
+                while (
+                    nextIndex !== flatIndex &&
+                    rowStatesFlat[nextIndex] !== STATE.ASK
+                ) {
+                    console.log("in the while loop");
+                    nextIndex =
+                        (nextIndex + inputRefsFlat.length + step) %
+                        inputRefsFlat.length;
+                }
+
+                if (nextIndex === flatIndex && isRowAnswered) {
+                    setTimeout(() => {
+                        setIsCardDone(true);
+                    }, 10);
+                }
+
+                setTimeout(() => {
+                    inputRefsFlat[nextIndex].current?.focus();
+                });
+                return prev;
+            });
+        },
+        [getFlatIndex]
+    );
 
     const refillDrawPile = useCallback(() => {
         // move 5 cards to diamonds to clubs
@@ -348,58 +411,6 @@ export default function DeckPage() {
 
         // setCardIndex(Math.floor(cards!.length * Math.random()));
     }, [refillDrawPile]);
-
-    const handleKeyDown = (
-        categoryID: string,
-        rowIndex: number,
-        event: React.KeyboardEvent<HTMLInputElement>,
-        row: CardRow
-    ) => {
-        const value = event.currentTarget.value;
-        switch (event.key) {
-            case "Enter":
-                event.preventDefault();
-                const isAnswerCorrect = getIsAnswerCorrect(value, row)
-
-                if (value === "") {
-                    focusNextInput(categoryID, rowIndex, 1, false);
-                    //
-                } else if (isAnswerCorrect) {
-                    inputRefs.current.get(categoryID)![
-                        rowIndex
-                    ].current!.value = "";
-                    updateRowState(categoryID, rowIndex, STATE.CORRECT);
-
-                    focusNextInput(categoryID, rowIndex, 1, isAnswerCorrect);
-                    //
-                } else if (value === "idk") {
-                    inputRefs.current.get(categoryID)![
-                        rowIndex
-                    ].current!.value = "";
-                    cardPerformance.current = -1;
-                    updateRowState(categoryID, rowIndex, STATE.INCORRECT);
-                    focusNextInput(categoryID, rowIndex, 1, true);
-                    //
-                } else {
-                    cardPerformance.current = 0;
-                    inputRefs.current
-                        .get(categoryID)!
-                        [rowIndex].current?.select();
-                }
-
-                break;
-
-            case "ArrowUp":
-                event.preventDefault();
-                focusNextInput(categoryID, rowIndex, -1, false);
-                break;
-
-            case "ArrowDown":
-                event.preventDefault();
-                focusNextInput(categoryID, rowIndex, 1, false);
-                break;
-        }
-    };
 
     // fetch Cards from firestore and initialize cardSuits[0]
     useEffect(() => {
@@ -493,6 +504,9 @@ export default function DeckPage() {
                                         inputRefs.current.get(category._ID)!
                                     }
                                     rowStates={rowStates.get(category._ID)!}
+                                    handleOnFocus={handleOnFocus}
+                                    handleOnBlur={handleOnBlur}
+                                    handleOnClick={handleOnClick}
                                     handleKeyDown={(
                                         rowIndex: number,
                                         event: React.KeyboardEvent<HTMLInputElement>,
@@ -518,6 +532,14 @@ export default function DeckPage() {
                     >
                         rowStates
                     </button>
+                    <div
+                        className={classNames(styles.Caret)}
+                        style={{
+                            opacity: caretData.active ? 100 : 0,
+                            top: caretData.top,
+                            left: caretData.left,
+                        }}
+                    />
                 </div>
             ) : (
                 <p>Loading...</p>

@@ -6,6 +6,9 @@ interface Props {
     category: CardCategory;
     inputRefs: React.RefObject<HTMLInputElement>[];
     rowStates: STATE[];
+    handleOnFocus: (event: React.FocusEvent<HTMLInputElement>) => void;
+    handleOnBlur: () => void;
+    handleOnClick: (event: React.MouseEvent<HTMLInputElement, MouseEvent>) => void;
     handleKeyDown: (
         inputIndex: number,
         event: React.KeyboardEvent<HTMLInputElement>,
@@ -17,6 +20,9 @@ export default function InputCategory({
     category,
     inputRefs,
     rowStates,
+    handleOnFocus,
+    handleOnBlur,
+    handleOnClick,
     handleKeyDown,
 }: Props) {
     //
@@ -28,6 +34,9 @@ export default function InputCategory({
                     <InputRow
                         row={row}
                         state={rowStates[rowIndex]}
+                        handleOnFocus={handleOnFocus}
+                        handleOnBlur={handleOnBlur}
+                        handleOnClick={handleOnClick}
                         handleKeyDown={(e) => {
                             handleKeyDown(rowIndex, e, row);
                         }}

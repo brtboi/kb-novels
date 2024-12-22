@@ -6,11 +6,14 @@ import { CardRow, STATE } from "../../entity/types";
 interface Props {
     row: CardRow;
     state: STATE;
+    handleOnFocus: (event: React.FocusEvent<HTMLInputElement>) => void;
+    handleOnBlur: () => void;
+    handleOnClick: (event: React.MouseEvent<HTMLInputElement, MouseEvent>) => void;
     handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 export default React.forwardRef<HTMLInputElement, Props>(
-    ({ row, state, handleKeyDown }, ref) => {
+    ({ row, state, handleOnFocus, handleOnBlur, handleOnClick, handleKeyDown }, ref) => {
         return (
             <div
                 className={classNames(styles.InputRow, {
@@ -25,6 +28,9 @@ export default React.forwardRef<HTMLInputElement, Props>(
                         type="text"
                         autoComplete="off"
                         spellCheck="false"
+                        onFocus={handleOnFocus}
+                        onBlur={handleOnBlur}
+                        onClick={handleOnClick}
                         onKeyDown={handleKeyDown}
                         ref={ref}
                     />
