@@ -39,20 +39,21 @@ export default function DeckPage() {
     const drawPile = useRef<DrawPileItem[]>([]);
     const cardPerformance = useRef<-1 | 0 | 1>(1);
 
-    const inputRefs = useRef<Map<string, React.RefObject<HTMLInputElement>[]>>(
-        new Map()
-    );
+    const inputRefs = useRef<
+        Record<string, React.RefObject<HTMLInputElement>[]>
+    >({});
     const _isSequential = useRef<Record<string, boolean>>({});
     const _dependencies = useRef<Record<string, string[]>>({});
 
-    const [rowStates, setRowStates] = useState<Map<string, STATE[]>>(new Map());
+    const [rowStates, setRowStates] = useState<Record<string, STATE[]>>({});
+    // const [categorySettings, setCategorySettings] = useState<Map<
 
     const [isCardDone, setIsCardDone] = useState<boolean>(false);
 
     const [caretData, setCaretData] = useState<CaretData>({
         active: false,
         top: 0,
-        left: 0
+        left: 0,
     });
     const rem = parseFloat(
         window.getComputedStyle(document.documentElement).fontSize
@@ -117,7 +118,7 @@ export default function DeckPage() {
             setCaretData({
                 active: true,
                 top: rect.top,
-                left: rect.left + (element.selectionStart || 0) * fontWidth
+                left: rect.left + (element.selectionStart || 0) * fontWidth,
             });
         }, 2);
     };
@@ -129,11 +130,11 @@ export default function DeckPage() {
     ) => {
         setRowStates((prev) => {
             const updatedRowStates = structuredClone(prev);
-            const updatedRowStatesCategory = [...prev.get(categoryID)!];
+            const updatedRowStatesCategory = [...prev[categoryID]!];
 
             updatedRowStatesCategory[rowIndex] = newState;
 
-            updatedRowStates.set(categoryID, updatedRowStatesCategory);
+            updatedRowStates[categoryID] = updatedRowStatesCategory;
             return updatedRowStates;
         });
         checkIsSequential();
@@ -173,26 +174,20 @@ export default function DeckPage() {
                     focusNextInput(categoryID, rowIndex, 1, false);
                     //
                 } else if (isAnswerCorrect) {
-                    inputRefs.current.get(categoryID)![
-                        rowIndex
-                    ].current!.value = "";
+                    inputRefs.current[categoryID][rowIndex].current!.value = "";
                     updateRowState(categoryID, rowIndex, STATE.CORRECT);
 
                     focusNextInput(categoryID, rowIndex, 1, isAnswerCorrect);
                     //
                 } else if (value === "idk") {
-                    inputRefs.current.get(categoryID)![
-                        rowIndex
-                    ].current!.value = "";
+                    inputRefs.current[categoryID][rowIndex].current!.value = "";
                     cardPerformance.current = -1;
                     updateRowState(categoryID, rowIndex, STATE.INCORRECT);
                     focusNextInput(categoryID, rowIndex, 1, true);
                     //
                 } else {
                     cardPerformance.current = 0;
-                    inputRefs.current
-                        .get(categoryID)!
-                        [rowIndex].current?.select();
+                    inputRefs.current[categoryID][rowIndex].current?.select();
                 }
 
                 break;
@@ -223,7 +218,7 @@ export default function DeckPage() {
 
             for (const category of cards[cardIndex].categories) {
                 if (category._isSequential) {
-                    const states = updatedRowStates.get(category._ID)!;
+                    const states = updatedRowStates[category._ID];
 
                     for (let i = 1; i < states.length; i++) {
                         if (
@@ -231,10 +226,10 @@ export default function DeckPage() {
                             (states[i - 1] === STATE.CORRECT ||
                                 states[i - 1] === STATE.INCORRECT)
                         ) {
-                            const _rowStatesTemp = [...prev.get(category._ID)!];
+                            const _rowStatesTemp = [...prev[category._ID]];
                             _rowStatesTemp[i] = STATE.ASK;
 
-                            updatedRowStates.set(category._ID, _rowStatesTemp);
+                            updatedRowStates[category._ID] = _rowStatesTemp;
                             break;
                         }
                     }
@@ -254,7 +249,7 @@ export default function DeckPage() {
         setRowStates((prev) => {
             const updatedRowStates = structuredClone(prev);
 
-            const categoryStates = prev.entries().reduce(
+            const categoryStates = Object.entries(prev).reduce(
                 (acc, [categoryID, states]) => ({
                     ...acc,
                     [categoryID]: states.every(
@@ -267,26 +262,20 @@ export default function DeckPage() {
             for (const category of cards[cardIndex].categories) {
                 // if the category is currently hidden and all of it's dependencies are fulfilled
                 if (
-                    prev
-                        .get(category._ID)
-                        ?.every((state) => state === STATE.HIDE) &&
+                    prev[category._ID]?.every(
+                        (state) => state === STATE.HIDE
+                    ) &&
                     _dependencies.current[category._ID].every(
                         (dependencyID) => categoryStates[dependencyID]
                     )
                 ) {
                     if (category._isSequential) {
-                        updatedRowStates.set(
-                            category._ID,
-                            prev
-                                .get(category._ID)!
-                                .map((_, i) =>
-                                    i === 0 ? STATE.ASK : STATE.HIDE
-                                )
+                        updatedRowStates[category._ID] = prev[category._ID].map(
+                            (_, i) => (i === 0 ? STATE.ASK : STATE.HIDE)
                         );
                     } else {
-                        updatedRowStates.set(
-                            category._ID,
-                            prev.get(category._ID)!.map(() => STATE.ASK)
+                        updatedRowStates[category._ID] = prev[category._ID].map(
+                            () => STATE.ASK
                         );
                     }
                 }
@@ -303,11 +292,13 @@ export default function DeckPage() {
             step: -1 | 1,
             isRowAnswered: boolean
         ) => {
-            const inputRefsFlat = Array.from(inputRefs.current.values()).flat();
+            const inputRefsFlat = Array.from(
+                Object.values(inputRefs.current)
+            ).flat();
 
             setRowStates((prev) => {
                 const flatIndex = getFlatIndex(categoryID, rowIndex);
-                const rowStatesFlat = Array.from(prev.values()).flat();
+                const rowStatesFlat = Array.from(Object.values(prev)).flat();
 
                 let nextIndex =
                     (flatIndex + inputRefsFlat.length + step) %
@@ -431,25 +422,25 @@ export default function DeckPage() {
     // Initialize inputRefs & rowStates & _dependencies & _isSequential
     useEffect(() => {
         if (cards) {
-            const _inputRefs = new Map();
-            let _rowStates = new Map();
+            const _inputRefs: Record<
+                string,
+                React.RefObject<HTMLInputElement>[]
+            > = {};
+            let _rowStates: Record<string, STATE[]> = {};
 
             cards[cardIndex].categories.forEach((category) => {
-                _inputRefs.set(
-                    category._ID,
-                    category.rows.map(() => createRef<HTMLInputElement>())
+                _inputRefs[category._ID] = category.rows.map(() =>
+                    createRef<HTMLInputElement>()
                 );
-                _rowStates.set(
-                    category._ID,
-                    category.rows.map(() => STATE.HIDE)
-                );
+
+                _rowStates[category._ID] = category.rows.map(() => STATE.HIDE);
 
                 _dependencies.current[category._ID] = category._dependencies;
                 _isSequential.current[category._ID] = category._isSequential;
             });
 
-            inputRefs.current = new Map(_inputRefs);
-            setRowStates(new Map(_rowStates));
+            inputRefs.current = _inputRefs;
+            setRowStates(_rowStates);
             checkDependencies();
 
             setIsFirstLoaded(true);
@@ -489,8 +480,8 @@ export default function DeckPage() {
     return (
         <>
             {cards !== null &&
-            inputRefs.current.size !== 0 &&
-            rowStates.size !== 0 ? (
+            Object.keys(inputRefs.current).length !== 0 &&
+            Object.keys(rowStates).length !== 0 ? (
                 <div className={classNames(styles.InputBody)}>
                     {cards[cardIndex].categories.map(
                         (category, categoryIndex) => {
@@ -498,9 +489,9 @@ export default function DeckPage() {
                                 <InputCategory
                                     category={category}
                                     inputRefs={
-                                        inputRefs.current.get(category._ID)!
+                                        inputRefs.current[category._ID]
                                     }
-                                    rowStates={rowStates.get(category._ID)!}
+                                    rowStates={rowStates[category._ID]}
                                     handleOnFocus={handleOnFocus}
                                     handleOnBlur={handleOnBlur}
                                     handleOnClick={handleOnClick}
