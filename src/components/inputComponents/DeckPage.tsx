@@ -25,7 +25,6 @@ interface CaretData {
     active: boolean;
     top: number;
     left: number;
-    lastKeyPress: Date | null;
 }
 
 export default function DeckPage() {
@@ -53,8 +52,7 @@ export default function DeckPage() {
     const [caretData, setCaretData] = useState<CaretData>({
         active: false,
         top: 0,
-        left: 0,
-        lastKeyPress: null,
+        left: 0
     });
     const rem = parseFloat(
         window.getComputedStyle(document.documentElement).fontSize
@@ -119,8 +117,7 @@ export default function DeckPage() {
             setCaretData({
                 active: true,
                 top: rect.top,
-                left: rect.left + (element.selectionStart || 0) * fontWidth,
-                lastKeyPress: new Date()
+                left: rect.left + (element.selectionStart || 0) * fontWidth
             });
         }, 2);
     };
