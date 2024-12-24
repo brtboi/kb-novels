@@ -12,6 +12,7 @@ import { useParams } from "react-router-dom";
 import InputCategory from "./InputCategory.tsx";
 import classNames from "classnames";
 import styles from "./inputStyles.module.css";
+import SettingsOverlay from "./SettingsOverlay.tsx";
 
 type Suit = 0 | 1 | 2 | 3;
 
@@ -33,6 +34,7 @@ export default function DeckPage() {
     const [isFirstLoaded, setIsFirstLoaded] = useState<boolean>(false);
 
     const [cards, setCards] = useState<Card[] | null>(null);
+    const [template, setTemplate] = useState<Card | null>(null);
     const [cardIndex, setCardIndex] = useState<number>(0);
     const cardSuits = useRef<number[][]>([[], [], [], []]);
 
@@ -46,7 +48,10 @@ export default function DeckPage() {
     const _dependencies = useRef<Record<string, string[]>>({});
 
     const [rowStates, setRowStates] = useState<Record<string, STATE[]>>({});
-    // const [categorySettings, setCategorySettings] = useState<Map<
+    const [categorySettings, setCategorySettings] = useState<
+        Record<string, STATE>
+    >({});
+    const [isSettings, setIsSettings] = useState<boolean>(false);
 
     const [isCardDone, setIsCardDone] = useState<boolean>(false);
 
@@ -158,7 +163,7 @@ export default function DeckPage() {
         moveCaret(event.currentTarget);
     };
 
-    const handleKeyDown = (
+    const handleOnKeyDown = (
         categoryID: string,
         rowIndex: number,
         event: React.KeyboardEvent<HTMLInputElement>,
@@ -249,6 +254,7 @@ export default function DeckPage() {
         setRowStates((prev) => {
             const updatedRowStates = structuredClone(prev);
 
+            //Record<categoryID, boolean>
             const categoryStates = Object.entries(prev).reduce(
                 (acc, [categoryID, states]) => ({
                     ...acc,
@@ -260,14 +266,14 @@ export default function DeckPage() {
             );
 
             for (const category of cards[cardIndex].categories) {
+                const isDependeniesFulfilled = _dependencies.current[
+                    category._ID
+                ].every((dependencyID) => categoryStates[dependencyID]);
+
                 // if the category is currently hidden and all of it's dependencies are fulfilled
                 if (
-                    prev[category._ID]?.every(
-                        (state) => state === STATE.HIDE
-                    ) &&
-                    _dependencies.current[category._ID].every(
-                        (dependencyID) => categoryStates[dependencyID]
-                    )
+                    isDependeniesFulfilled &&
+                    prev[category._ID]?.every((state) => state === STATE.HIDE)
                 ) {
                     if (category._isSequential) {
                         updatedRowStates[category._ID] = prev[category._ID].map(
@@ -278,12 +284,73 @@ export default function DeckPage() {
                             () => STATE.ASK
                         );
                     }
+
+                    // if the category isn't STATE.SHOW not STATE.DISABLE and dependencies aren't fulfilled
+                } else if (
+                    !isDependeniesFulfilled &&
+                    !prev[category._ID]?.every((state) => (state === STATE.SHOW || state=== STATE.DISABLE))
+                ) {
+                    updatedRowStates[category._ID] = prev[category._ID].map(
+                        () => STATE.HIDE
+                    );
                 }
             }
 
             return updatedRowStates;
         });
     }, [cards, cardIndex]);
+
+    const changeCategorySettings = useCallback(
+        (categoryID: string, newState: STATE) => {
+            setCategorySettings((prevCategorySettings) => {
+                const _updatedCategorySettings =
+                    structuredClone(prevCategorySettings);
+                _updatedCategorySettings[categoryID] = newState;
+
+                if (
+                    cards &&
+                    !cards[cardIndex].categories.some(
+                        (category) => category._ID === categoryID
+                    )
+                ) {
+                    return _updatedCategorySettings;
+                }
+
+                setRowStates((prevRowStates) => {
+                    const _updatedRowStates = structuredClone(prevRowStates);
+
+                    switch (newState) {
+                        case STATE.ASK:
+                            _updatedRowStates[categoryID] = prevRowStates[
+                                categoryID
+                            ].map((_) => STATE.HIDE);
+                            break;
+
+                        case STATE.SHOW:
+                            _updatedRowStates[categoryID] = prevRowStates[
+                                categoryID
+                            ].map((_) => STATE.SHOW);
+                            break;
+
+                        case STATE.DISABLE:
+                            _updatedRowStates[categoryID] = prevRowStates[
+                                categoryID
+                            ].map((_) => STATE.DISABLE);
+                    }
+
+                    return _updatedRowStates;
+                });
+
+                return _updatedCategorySettings;
+            });
+
+            setTimeout(() => {
+                checkIsSequential();
+                checkDependencies();
+            });
+        },
+        [checkDependencies, checkIsSequential]
+    );
 
     const focusNextInput = useCallback(
         (
@@ -400,13 +467,27 @@ export default function DeckPage() {
         // setCardIndex(Math.floor(cards!.length * Math.random()));
     }, [refillDrawPile]);
 
-    // fetch Cards from firestore and initialize cardSuits[0]
+    // fetch Cards % template from firestore and initialize cardSuits[0]
     useEffect(() => {
         const fetchCards = async () => {
             try {
                 const docSnapshot = await getDoc(doc(db, `decks/${deckId}`));
                 const cards = JSON.parse(docSnapshot.data()?.cards) as Card[];
                 setCards(cards);
+
+                const template = JSON.parse(
+                    docSnapshot.data()?.template
+                ) as Card;
+                setTemplate(template);
+                setCategorySettings(
+                    template.categories.reduce(
+                        (acc, category) => ({
+                            ...acc,
+                            [category._ID]: STATE.ASK,
+                        }),
+                        {}
+                    )
+                );
 
                 // puts indices 0 to nCards - 1 into box0
                 cardSuits.current[0] = cards.map((_, i) => i);
@@ -426,7 +507,7 @@ export default function DeckPage() {
                 string,
                 React.RefObject<HTMLInputElement>[]
             > = {};
-            let _rowStates: Record<string, STATE[]> = {};
+            const _rowStates: Record<string, STATE[]> = {};
 
             cards[cardIndex].categories.forEach((category) => {
                 _inputRefs[category._ID] = category.rows.map(() =>
@@ -467,7 +548,25 @@ export default function DeckPage() {
     // global key down event listener for enter
     useEffect(() => {
         const handleGlobalKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Enter" && isCardDone) {
+            if (e.key === "Escape" && cards) {
+                setIsSettings((prev) => {
+                    //focus first input when exit settings overlay
+                    setTimeout(() => {
+                        focusNextInput(
+                            cards[cardIndex].categories[
+                                cards[cardIndex].categories.length - 1
+                            ]._ID,
+                            cards[cardIndex].categories[
+                                cards[cardIndex].categories.length - 1
+                            ].rows.length - 1,
+                            1,
+                            false
+                        );
+                    }, 2);
+
+                    return !prev;
+                });
+            } else if (e.key === "Enter" && isCardDone) {
                 getNextCard();
             }
         };
@@ -480,6 +579,7 @@ export default function DeckPage() {
     return (
         <>
             {cards !== null &&
+            template !== null &&
             Object.keys(inputRefs.current).length !== 0 &&
             Object.keys(rowStates).length !== 0 ? (
                 <div className={classNames(styles.InputBody)}>
@@ -488,9 +588,7 @@ export default function DeckPage() {
                             return (
                                 <InputCategory
                                     category={category}
-                                    inputRefs={
-                                        inputRefs.current[category._ID]
-                                    }
+                                    inputRefs={inputRefs.current[category._ID]}
                                     rowStates={rowStates[category._ID]}
                                     handleOnFocus={handleOnFocus}
                                     handleOnBlur={handleOnBlur}
@@ -500,7 +598,7 @@ export default function DeckPage() {
                                         event: React.KeyboardEvent<HTMLInputElement>,
                                         row: CardRow
                                     ) => {
-                                        handleKeyDown(
+                                        handleOnKeyDown(
                                             category._ID,
                                             rowIndex,
                                             event,
@@ -512,7 +610,9 @@ export default function DeckPage() {
                             );
                         }
                     )}
+
                     <button onClick={getNextCard}>next Card</button>
+
                     <button
                         onClick={() => {
                             console.log(rowStates);
@@ -520,6 +620,7 @@ export default function DeckPage() {
                     >
                         rowStates
                     </button>
+
                     <div
                         className={classNames(styles.Caret)}
                         style={{
@@ -527,6 +628,13 @@ export default function DeckPage() {
                             top: caretData.top,
                             left: caretData.left,
                         }}
+                    />
+
+                    <SettingsOverlay
+                        isSettings={isSettings}
+                        template={template}
+                        categorySettings={categorySettings}
+                        changeCategorySettings={changeCategorySettings}
                     />
                 </div>
             ) : (
