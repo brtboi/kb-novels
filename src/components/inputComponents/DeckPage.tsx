@@ -349,7 +349,7 @@ export default function DeckPage() {
                 checkDependencies();
             });
         },
-        [checkDependencies, checkIsSequential]
+        [cards, cardIndex, checkDependencies, checkIsSequential]
     );
 
     const focusNextInput = useCallback(
