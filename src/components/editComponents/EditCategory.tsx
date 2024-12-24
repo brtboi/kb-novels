@@ -27,6 +27,12 @@ export default function EditCategory({
         updateCategory({ ...category, rows: updatedRows });
     };
 
+    const deleteRow = (rowIndex: number) => {
+        const updatedRows = structuredClone(category.rows);
+        updatedRows.splice(rowIndex, 1);
+        updateCategory({ ...category, rows: updatedRows });
+    }
+
     return (
         <div className={classNames(styles.CardCategory)}>
             <EditCategoryHeader
@@ -41,6 +47,7 @@ export default function EditCategory({
                     updateRow={(newRow) => {
                         updateRow(rowIndex, newRow);
                     }}
+                    deleteRow={() => {deleteRow(rowIndex)}}
                     isTemplate={isTemplate}
                     key={`${category.name} | ${rowIndex} | ${row.label}`}
                 />

@@ -4,6 +4,8 @@
     flex-flow: column nowrap;
     justify-content: center;
     gap: 1rem;
+    
+    caret-color: transparent;
 }
 
 .InputCategory {

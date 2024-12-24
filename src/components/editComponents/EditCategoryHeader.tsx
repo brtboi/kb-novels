@@ -79,17 +79,19 @@ export default function EditCategoryHeader({
 
     return (
         <div className={classNames(styles.CategoryHeader)}>
-            <input
-                className={classNames(styles.CategoryName, styles.Input)}
-                type="text"
-                value={categoryName}
-                onChange={handleUpdateCategoryName}
-                onBlur={handleCategoryNameOnBlur}
-                style={{
-                    width: `${Math.max(categoryName.length + 2, 1)}ch`,
-                }}
-                spellCheck={false}
-            />
+            <div className={styles.CategoryNameDiv}>
+                <input
+                    className={classNames(styles.CategoryName, styles.Input)}
+                    type="text"
+                    value={categoryName}
+                    onChange={handleUpdateCategoryName}
+                    onBlur={handleCategoryNameOnBlur}
+                    style={{
+                        width: `${Math.max(categoryName.length + 2, 1)}ch`,
+                    }}
+                    spellCheck={false}
+                />
+            </div>
             <button className={classNames(styles.AddButton)} onClick={addRow}>
                 Add Row
             </button>

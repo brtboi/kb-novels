@@ -12,6 +12,7 @@ import { ReactComponent as NameIcon } from "../../assets/Icons/Person.svg";
 interface RowProps {
     row: CardRow;
     updateRow: (updatedRow: CardRow) => void;
+    deleteRow: () => void;
     isTemplate: boolean;
 }
 
@@ -30,7 +31,12 @@ const IconByType: Record<RowType, JSX.Element> = {
     number: <NumberIcon className={styles.Icon} />,
 };
 
-export default function Row({ row, updateRow, isTemplate }: RowProps) {
+export default function Row({
+    row,
+    updateRow,
+    deleteRow,
+    isTemplate,
+}: RowProps) {
     //
     const [label, setLabel] = useState<string>(row.label);
     const [answers, setAnswers] = useState<string[]>(row.answers);
@@ -155,7 +161,7 @@ export default function Row({ row, updateRow, isTemplate }: RowProps) {
                     [styles.expanded]: isRowTypesOpen,
                 })}
                 style={{
-                    width: isRowTypesOpen ? "11.5rem" : "6.5rem",
+                    width: isRowTypesOpen ? "14rem" : "9rem",
                     transition: "width 0.5s ease",
                 }}
             >
@@ -207,6 +213,9 @@ export default function Row({ row, updateRow, isTemplate }: RowProps) {
                     })}
                 >
                     <CaseSensitiveIcon className={classNames(styles.Icon)} />
+                </button>
+                <button onClick={deleteRow} className={styles.SettingsButton}>
+                    <DeleteIcon className={styles.Icon} />
                 </button>
             </div>
         </div>
