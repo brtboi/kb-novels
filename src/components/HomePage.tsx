@@ -3,7 +3,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { Deck } from "../entity/types";
 import { Link } from "react-router-dom";
-import styles from "./homePageStyles.module.css";
+import styles from "./homePageStyles.module.scss";
 import classNames from "classnames";
 
 export default function HomePage() {

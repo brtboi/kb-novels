@@ -1,0 +1,127 @@
+@import "../../variables.scss";
+
+@keyframes shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    25%,
+    75% {
+        transform: translateX(-5px);
+    }
+    50% {
+        transform: translateX(5px);
+    }
+}
+
+.InputBody {
+    width: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    gap: 1rem;
+
+    caret-color: transparent;
+
+    .InputCategory {
+        display: flex;
+        flex-flow: column nowrap;
+    }
+
+    .InputRow {
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+        overflow: hidden;
+
+        &.hide {
+            display: none;
+        }
+
+        .Label {
+            width: 30%;
+
+            text-align: right;
+        }
+
+        .Input {
+            width: 70%;
+            background-color: transparent;
+            outline: none;
+            font-family: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+            color: inherit;
+        }
+
+        .Answer {
+            width: 70%;
+
+            &.correct {
+                color: lightGreen;
+            }
+
+            &.incorrect {
+                color: tomato;
+            }
+
+            &.shake {
+                animation: shake 0.3s ease-in-out;
+            }
+        }
+    }
+}
+
+.Caret {
+    position: fixed;
+    top: 10%;
+    left: 20%;
+    height: 1.75rem;
+    width: 2px;
+
+    background-color: var(--primaryColor);
+
+    transform: translateX(-1px);
+    transition: all 150ms ease-out;
+}
+
+.SettingsOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+
+    transition: opacity 0.2s ease-in-out;
+
+    display: flex;
+    justify-content: space-around;
+
+    .SettingsDiv {
+        position: absolute;
+        top: 5%;
+        width: 50%;
+        height: 75%;
+        padding: 1rem;
+
+        border-radius: 0.4rem;
+        opacity: 1;
+        background-color: var(--backgroundColor);
+
+        display: flex;
+        flex-direction: column;
+
+        .SettingsButton {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+
+            &:focus {
+                background-color: grey;
+            }
+        }
+    }
+}

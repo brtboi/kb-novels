@@ -1,3 +1,5 @@
+@import './variables.scss';
+
 @font-face {
     font-family: "Roboto Mono";
     src: url(./assets/Roboto_Mono/RobotoMono-VariableFont_wght.ttf)
@@ -31,10 +33,9 @@
 }
 
 body {
-    background-color: var(--backgroundColor);
-    font-family: var(--fontFamily);
-    font-size: var(--fontSize);
-    font-weight: var(--fontWeight);
-    color: var(--fontColor);
-    /* caret-color: transparent; */
+    background-color: $backgroundColor;
+    font-family: $fontFamily;
+    font-size: $fontSize;
+    font-weight: $fontWeight;
+    color: $fontColor;
 }

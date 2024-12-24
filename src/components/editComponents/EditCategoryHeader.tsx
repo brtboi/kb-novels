@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import styles from "./editStyles.module.css";
+import styles from "./editStyles.module.scss";
 import { ReactComponent as DependenciesIcon } from "../../assets/Icons/Dependencies.svg";
 import { ReactComponent as CheckBoxOff } from "../../assets/Icons/CheckBoxOff.svg";
 import { ReactComponent as CheckBoxOn } from "../../assets/Icons/CheckBoxOn.svg";

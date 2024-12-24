@@ -1,6 +1,6 @@
 import React from "react";
 import classNames from "classnames";
-import styles from "./editStyles.module.css";
+import styles from "./editStyles.module.scss";
 import { CardCategory, CardRow } from "../../entity/types";
 import EditRow from "./EditRow";
 import EditCategoryHeader from "./EditCategoryHeader";

@@ -1,6 +1,6 @@
 import React from "react";
 import classNames from "classnames";
-import styles from "./inputStyles.module.css";
+import styles from "./inputStyles.module.scss";
 import { CardRow, STATE } from "../../entity/types";
 
 interface Props {
@@ -8,12 +8,24 @@ interface Props {
     state: STATE;
     handleOnFocus: (event: React.FocusEvent<HTMLInputElement>) => void;
     handleOnBlur: () => void;
-    handleOnClick: (event: React.MouseEvent<HTMLInputElement, MouseEvent>) => void;
+    handleOnClick: (
+        event: React.MouseEvent<HTMLInputElement, MouseEvent>
+    ) => void;
     handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 export default React.forwardRef<HTMLInputElement, Props>(
-    ({ row, state, handleOnFocus, handleOnBlur, handleOnClick, handleKeyDown }, ref) => {
+    (
+        {
+            row,
+            state,
+            handleOnFocus,
+            handleOnBlur,
+            handleOnClick,
+            handleKeyDown,
+        },
+        ref
+    ) => {
         return (
             <div
                 className={classNames(styles.InputRow, {

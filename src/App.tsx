@@ -1,5 +1,5 @@
 import React from "react";
-import "./global.css";
+import "./global.scss";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import HomePage from "./components/HomePage";
 import DeckPage from "./components/inputComponents/DeckPage";

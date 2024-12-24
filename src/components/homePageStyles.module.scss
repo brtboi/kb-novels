@@ -1,3 +1,5 @@
+@import '../variables.scss';
+
 .HomePageDiv {
     display: flex;
     flex-direction: column;
@@ -15,5 +17,5 @@
 }
 
 .DeckLink:hover {
-    background-color: var(--fontColorSecondary);
+    background-color: $fontColorSecondary;
 }

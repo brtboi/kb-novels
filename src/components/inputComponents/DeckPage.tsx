@@ -11,7 +11,7 @@ import { db } from "../../firebase/firebase.ts";
 import { useParams } from "react-router-dom";
 import InputCategory from "./InputCategory.tsx";
 import classNames from "classnames";
-import styles from "./inputStyles.module.css";
+import styles from "./inputStyles.module.scss";
 import SettingsOverlay from "./SettingsOverlay.tsx";
 
 type Suit = 0 | 1 | 2 | 3;
@@ -288,7 +288,10 @@ export default function DeckPage() {
                     // if the category isn't STATE.SHOW not STATE.DISABLE and dependencies aren't fulfilled
                 } else if (
                     !isDependeniesFulfilled &&
-                    !prev[category._ID]?.every((state) => (state === STATE.SHOW || state=== STATE.DISABLE))
+                    !prev[category._ID]?.every(
+                        (state) =>
+                            state === STATE.SHOW || state === STATE.DISABLE
+                    )
                 ) {
                     updatedRowStates[category._ID] = prev[category._ID].map(
                         () => STATE.HIDE

@@ -5,7 +5,7 @@ import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import EditCard from "./EditCard";
 import classNames from "classnames";
-import styles from "./editStyles.module.css";
+import styles from "./editStyles.module.scss";
 import {
     DragDropContext,
     Draggable,

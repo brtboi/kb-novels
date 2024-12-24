@@ -4,7 +4,7 @@ import EditCategory from "./EditCategory";
 import { ReactComponent as DeleteIcon } from "../../assets/Icons/Delete.svg";
 import { ReactComponent as DropDownIcon } from "../../assets/Icons/DropDown.svg";
 import { ReactComponent as ReorderIcon } from "../../assets/Icons/Reorder.svg";
-import styles from "./editStyles.module.css";
+import styles from "./editStyles.module.scss";
 import classNames from "classnames";
 import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 
