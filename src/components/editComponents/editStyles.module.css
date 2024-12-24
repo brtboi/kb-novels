@@ -49,6 +49,25 @@ button {
     text-decoration: underline;
 }
 
+.AddButton {
+    display: flex;
+    flex-direction: row;
+    background-color: var(--primaryColor);
+    transition: background-color 100ms ease-in;
+    border-radius: 1rem;
+    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+    color: var(--backgroundColor);
+    fill: var(--backgroundColor);
+    stroke: var(--backgroundColor);
+}
+
+.AddButton:hover {
+    background-color: var(--fontColor);
+    transition: background-color 100ms ease-in;
+}
+
 .Card {
     display: flex;
     flex-direction: row;
@@ -157,25 +176,6 @@ button {
     background-color: var(--backgroundColor);
 }
 
-.AddButton {
-    display: flex;
-    flex-direction: row;
-    background-color: var(--primaryColor);
-    transition: background-color 100ms ease-in;
-    border-radius: 1rem;
-    overflow: hidden;
-    justify-content: center;
-    align-items: center;
-    color: var(--backgroundColor);
-    fill: var(--backgroundColor);
-    stroke: var(--backgroundColor);
-}
-
-.AddButton:hover {
-    background-color: var(--fontColor);
-    transition: background-color 100ms ease-in;
-}
-
 .CategoryHeader .AddButton {
     position: absolute;
     left: 50%;
@@ -194,6 +194,15 @@ button {
     padding: 0 1rem 0 1rem;
     background-color: var(--backgroundColor);
     overflow: hidden;
+}
+
+.AddCategoryDiv {
+    display: flex;
+    font-size: 1.2rem;
+}
+
+.AddCategoryButton:hover {
+    text-decoration: underline;
 }
 
 .CardRow {

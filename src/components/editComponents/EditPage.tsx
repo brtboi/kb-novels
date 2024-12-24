@@ -20,29 +20,6 @@ export default function EditPage() {
     const [templateCard, setTemplateCard] = useState<Card | null>(null);
     const [cards, setCards] = useState<Card[] | null>(null);
 
-    useEffect(() => {
-        const fetchCards = async () => {
-            try {
-                const docSnapshot = await getDoc(doc(db, `decks/${deckId}`));
-                const data = docSnapshot.data();
-
-                setDeckName(data?.name);
-                setTemplateCard(JSON.parse(data?.template));
-                setCards(JSON.parse(data?.cards));
-            } catch (e) {
-                console.error("Error fetching CARDS", e);
-            }
-        };
-
-        if (deckId === "new") {
-            setDeckName("");
-            setTemplateCard({ categories: [] });
-            setCards([]);
-        } else {
-            fetchCards();
-        }
-    }, [deckId]);
-
     const handleSaveDeck = async () => {
         if (deckId === "new") {
             try {
@@ -111,6 +88,30 @@ export default function EditPage() {
         });
     };
 
+    // fetch cards
+    useEffect(() => {
+        const fetchCards = async () => {
+            try {
+                const docSnapshot = await getDoc(doc(db, `decks/${deckId}`));
+                const data = docSnapshot.data();
+
+                setDeckName(data?.name);
+                setTemplateCard(JSON.parse(data?.template));
+                setCards(JSON.parse(data?.cards));
+            } catch (e) {
+                console.error("Error fetching CARDS", e);
+            }
+        };
+
+        if (deckId === "new") {
+            setDeckName("");
+            setTemplateCard({ categories: [] });
+            setCards([]);
+        } else {
+            fetchCards();
+        }
+    }, [deckId]);
+
     return (
         <>
             {deckName !== null && templateCard !== null && cards !== null ? (
@@ -168,6 +169,7 @@ export default function EditPage() {
                                                                 cardIndex
                                                             );
                                                         }}
+                                                        template={templateCard}
                                                         isTemplate={false}
                                                         dragHandleProps={
                                                             provided.dragHandleProps
@@ -183,21 +185,6 @@ export default function EditPage() {
                             )}
                         </Droppable>
                     </DragDropContext>
-
-                    {/* {cards.map((card, cardIndex) => (
-                        <EditCard
-                            card={card}
-                            cardIndex={cardIndex}
-                            updateCard={(newCard: Card) => {
-                                updateCard(cardIndex, newCard);
-                            }}
-                            deleteCard={() => {
-                                deleteCard(cardIndex);
-                            }}
-                            isTemplate={false}
-                            key={`card ${cardIndex}`}
-                        />
-                    ))} */}
 
                     <button onClick={addCard}>add Card</button>
                     <button
