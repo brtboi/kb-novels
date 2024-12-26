@@ -7,205 +7,232 @@ import EditCard from "./EditCard";
 import classNames from "classnames";
 import styles from "./editStyles.module.scss";
 import {
-    DragDropContext,
-    Draggable,
-    Droppable,
-    DropResult,
+   DragDropContext,
+   Draggable,
+   Droppable,
+   DropResult,
 } from "@hello-pangea/dnd";
 
 export default function EditPage() {
-    const { deckId } = useParams<{ deckId: string }>();
+   const { deckId } = useParams<{ deckId: string }>();
 
-    const [deckName, setDeckName] = useState<string | null>(null);
-    const [templateCard, setTemplateCard] = useState<Card | null>(null);
-    const [cards, setCards] = useState<Card[] | null>(null);
+   const [deckName, setDeckName] = useState<string | null>(null);
+   const [templateCard, setTemplateCard] = useState<Card | null>(null);
+   const [cards, setCards] = useState<Card[] | null>(null);
 
-    const handleSaveDeck = async () => {
-        if (deckId === "new") {
-            try {
-                const docRef = await addDoc(collection(db, "decks"), {
-                    name: deckName,
-                    template: JSON.stringify(templateCard),
-                    cards: JSON.stringify(cards),
-                });
+   const [isTemplateCollapsed, setIsTemplateCollapsed] =
+      useState<boolean>(false);
+   const [isCardsCollapsed, setIsCardsCollapsed] = useState<boolean[]>([]);
 
-                console.log("Doc created successfully with ID:", docRef.id);
-            } catch (error) {
-                console.error("Error saving deck to db:", error);
-            }
-        } else {
-            const docRef = doc(db, `decks/${deckId}`);
-            try {
-                await updateDoc(docRef, {
-                    name: deckName,
-                    template: JSON.stringify(templateCard),
-                    cards: JSON.stringify(cards),
-                });
+   const toggleIsCollapsed = (index: number) => {
+      setIsCardsCollapsed((prev) => prev.map((e, i) => (i === index ? !e : e)));
+   };
 
-                console.log("Doc successfully saved");
-            } catch (error) {
-                console.error("Error saving deck to db:", error);
-            }
-        }
-    };
+   const handleSaveDeck = async () => {
+      if (deckId === "new") {
+         try {
+            const docRef = await addDoc(collection(db, "decks"), {
+               name: deckName,
+               template: JSON.stringify(templateCard),
+               cards: JSON.stringify(cards),
+            });
 
-    const updateTemplateCard = (newCard: Card) => {
-        setTemplateCard(newCard);
-    };
+            console.log("Doc created successfully with ID:", docRef.id);
+         } catch (error) {
+            console.error("Error saving deck to db:", error);
+         }
+      } else {
+         const docRef = doc(db, `decks/${deckId}`);
+         try {
+            await updateDoc(docRef, {
+               name: deckName,
+               template: JSON.stringify(templateCard),
+               cards: JSON.stringify(cards),
+            });
 
-    const updateCard = (cardIndex: number, newCard: Card) => {
-        setCards((prev) => {
-            const updatedCards = structuredClone(prev!);
-            updatedCards[cardIndex] = newCard;
-            return updatedCards;
-        });
-    };
+            console.log("Doc successfully saved");
+         } catch (error) {
+            console.error("Error saving deck to db:", error);
+         }
+      }
+   };
 
-    const addCard = () => {
-        const newCard: Card = structuredClone(templateCard!);
-        setCards((prev) => [...prev!, newCard]);
-    };
+   const updateTemplateCard = (newCard: Card) => {
+      setTemplateCard(newCard);
+   };
 
-    const deleteCard = (index: number) => {
-        setCards((prev) => {
-            const updatedCards = structuredClone(prev!);
-            updatedCards.splice(index, 1);
-            return updatedCards;
-        });
-    };
+   const updateCard = (cardIndex: number, newCard: Card) => {
+      setCards((prev) => {
+         const updatedCards = structuredClone(prev!);
+         updatedCards[cardIndex] = newCard;
+         return updatedCards;
+      });
+   };
 
-    const handleCardsDragEnd = (result: DropResult<string>) => {
-        const { destination, source } = result;
+   const addCard = () => {
+      const newCard: Card = structuredClone(templateCard!);
+      setCards((prev) => [...prev!, newCard]);
+      setIsCardsCollapsed((prev) => [...prev, false]);
+   };
 
-        if (!destination) return; // Dropped outside a valid destination
-        if (destination.index === source.index) return; // No change in position
+   const deleteCard = (index: number) => {
+      setCards((prev) => {
+         const updatedCards = structuredClone(prev!);
+         updatedCards.splice(index, 1);
+         return updatedCards;
+      });
 
-        setCards((prev) => {
-            const updatedCards = structuredClone(prev!);
-            const [movedCard] = updatedCards.splice(source.index, 1);
-            updatedCards.splice(destination.index, 0, movedCard);
-            return updatedCards;
-        });
-    };
+      setIsCardsCollapsed((prev) => {
+         const _prev = structuredClone(prev);
+         _prev.splice(index, 1);
+         return _prev;
+      });
+   };
 
-    // fetch cards
-    useEffect(() => {
-        const fetchCards = async () => {
-            try {
-                const docSnapshot = await getDoc(doc(db, `decks/${deckId}`));
-                const data = docSnapshot.data();
+   const handleCardsDragEnd = (result: DropResult<string>) => {
+      const { destination, source } = result;
 
-                setDeckName(data?.name);
-                setTemplateCard(JSON.parse(data?.template));
-                setCards(JSON.parse(data?.cards));
-            } catch (e) {
-                console.error("Error fetching CARDS", e);
-            }
-        };
+      if (!destination) return; // Dropped outside a valid destination
+      if (destination.index === source.index) return; // No change in position
 
-        if (deckId === "new") {
-            setDeckName("");
-            setTemplateCard({ categories: [] });
-            setCards([]);
-        } else {
-            fetchCards();
-        }
-    }, [deckId]);
+      setCards((prev) => {
+         const updatedCards = structuredClone(prev!);
+         const [movedCard] = updatedCards.splice(source.index, 1);
+         updatedCards.splice(destination.index, 0, movedCard);
+         return updatedCards;
+      });
 
-    return (
-        <>
-            {deckName !== null && templateCard !== null && cards !== null ? (
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                    <p>
-                        Deck Name:
-                        <input
-                            className={classNames(styles.Input)}
-                            value={deckName}
-                            onChange={(e) => {
-                                setDeckName(e.target.value);
-                            }}
-                        />
-                    </p>
+      setIsCardsCollapsed((prev) => {
+         const _prev = structuredClone(prev);
+         const [movedCard] = _prev.splice(source.index, 1);
+         _prev.splice(destination.index, 0, movedCard);
+         return _prev;
+      });
+   };
 
-                    <EditCard
-                        card={templateCard}
-                        cardIndex={0}
-                        updateCard={updateTemplateCard}
-                        isTemplate={true}
-                    />
-                    <p>Cards:</p>
+   // fetch cards
+   useEffect(() => {
+      const fetchCards = async () => {
+         try {
+            const docSnapshot = await getDoc(doc(db, `decks/${deckId}`));
+            const data = docSnapshot.data();
+            const cards: Card[] = JSON.parse(data?.cards);
 
-                    <DragDropContext onDragEnd={handleCardsDragEnd}>
-                        <Droppable droppableId="CardsDroppable">
-                            {(provided) => (
-                                <div
-                                    {...provided.droppableProps}
-                                    ref={provided.innerRef}
-                                >
-                                    {cards.map((card, cardIndex) => (
-                                        <Draggable
-                                            index={cardIndex}
-                                            draggableId={`Card ${cardIndex}`}
-                                            key={`Card ${cardIndex}`}
-                                        >
-                                            {(provided) => (
-                                                <div
-                                                    {...provided.draggableProps}
-                                                    ref={provided.innerRef}
-                                                >
-                                                    <EditCard
-                                                        card={card}
-                                                        cardIndex={cardIndex}
-                                                        updateCard={(
-                                                            newCard: Card
-                                                        ) => {
-                                                            updateCard(
-                                                                cardIndex,
-                                                                newCard
-                                                            );
-                                                        }}
-                                                        deleteCard={() => {
-                                                            deleteCard(
-                                                                cardIndex
-                                                            );
-                                                        }}
-                                                        template={templateCard}
-                                                        isTemplate={false}
-                                                        dragHandleProps={
-                                                            provided.dragHandleProps
-                                                        }
-                                                        key={`card ${cardIndex}`}
-                                                    />
-                                                </div>
-                                            )}
-                                        </Draggable>
-                                    ))}
-                                    {provided.placeholder}
-                                </div>
-                            )}
-                        </Droppable>
-                    </DragDropContext>
+            setDeckName(data?.name);
+            setTemplateCard(JSON.parse(data?.template));
+            setCards(cards);
+            setIsCardsCollapsed(cards.map(() => false));
+         } catch (e) {
+            console.error("Error fetching CARDS", e);
+         }
+      };
 
-                    <button onClick={addCard}>add Card</button>
-                    <button
-                        onClick={() => {
-                            console.log(templateCard);
-                        }}
-                    >
-                        print template
-                    </button>
-                    <button
-                        onClick={() => {
-                            console.log(cards);
-                        }}
-                    >
-                        print cards
-                    </button>
-                    <button onClick={handleSaveDeck}>Save Deck</button>
-                </div>
-            ) : (
-                <p>loading...</p>
-            )}
-        </>
-    );
+      if (deckId === "new") {
+         setDeckName("");
+         setTemplateCard({ categories: [] });
+         setCards([]);
+      } else {
+         fetchCards();
+      }
+   }, [deckId]);
+
+   return (
+      <>
+         {deckName !== null && templateCard !== null && cards !== null ? (
+            <div style={{ display: "flex", flexDirection: "column" }}>
+               <p>
+                  Deck Name:
+                  <input
+                     className={classNames(styles.Input)}
+                     value={deckName}
+                     onChange={(e) => {
+                        setDeckName(e.target.value);
+                     }}
+                  />
+               </p>
+
+               <EditCard
+                  card={templateCard}
+                  cardIndex={0}
+                  updateCard={updateTemplateCard}
+                  isTemplate={true}
+                  isCollapsed={isTemplateCollapsed}
+                  toggleIsCollapsed={() => {
+                     setIsTemplateCollapsed((prev) => !prev);
+                  }}
+               />
+               <p>Cards:</p>
+
+               <DragDropContext onDragEnd={handleCardsDragEnd}>
+                  <Droppable droppableId="CardsDroppable">
+                     {(provided) => (
+                        <div
+                           {...provided.droppableProps}
+                           ref={provided.innerRef}
+                        >
+                           {cards.map((card, cardIndex) => (
+                              <Draggable
+                                 index={cardIndex}
+                                 draggableId={`Card ${cardIndex}`}
+                                 key={`Card ${cardIndex}`}
+                              >
+                                 {(provided) => (
+                                    <div
+                                       {...provided.draggableProps}
+                                       ref={provided.innerRef}
+                                    >
+                                       <EditCard
+                                          card={card}
+                                          cardIndex={cardIndex}
+                                          updateCard={(newCard: Card) => {
+                                             updateCard(cardIndex, newCard);
+                                          }}
+                                          deleteCard={() => {
+                                             deleteCard(cardIndex);
+                                          }}
+                                          template={templateCard}
+                                          isTemplate={false}
+                                          isCollapsed={
+                                             isCardsCollapsed[cardIndex]
+                                          }
+                                          toggleIsCollapsed={() => {
+                                             toggleIsCollapsed(cardIndex);
+                                          }}
+                                          dragHandleProps={
+                                             provided.dragHandleProps
+                                          }
+                                          key={`card ${cardIndex}`}
+                                       />
+                                    </div>
+                                 )}
+                              </Draggable>
+                           ))}
+                           {provided.placeholder}
+                        </div>
+                     )}
+                  </Droppable>
+               </DragDropContext>
+
+               <button onClick={addCard}>add Card</button>
+               <button
+                  onClick={() => {
+                     console.log(templateCard);
+                  }}
+               >
+                  print template
+               </button>
+               <button
+                  onClick={() => {
+                     console.log(cards);
+                  }}
+               >
+                  print cards
+               </button>
+               <button onClick={handleSaveDeck}>Save Deck</button>
+            </div>
+         ) : (
+            <p>loading...</p>
+         )}
+      </>
+   );
 }

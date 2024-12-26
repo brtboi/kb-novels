@@ -4,54 +4,60 @@ import styles from "./editStyles.module.scss";
 import { CardCategory, CardRow } from "../../entity/types";
 import EditRow from "./EditRow";
 import EditCategoryHeader from "./EditCategoryHeader";
+import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 
 interface Props {
-    category: CardCategory;
-    updateCategory: (updatedCategory: CardCategory) => void;
-    deleteCategory: () => void;
-    isTemplate: boolean;
-    categoryDict: Record<string, string>;
+   category: CardCategory;
+   updateCategory: (updatedCategory: CardCategory) => void;
+   deleteCategory: () => void;
+   isTemplate: boolean;
+   categoryDict: Record<string, string>;
+   dragHandleProps: DraggableProvidedDragHandleProps | null;
 }
 
 export default function EditCategory({
-    category,
-    updateCategory,
-    deleteCategory,
-    isTemplate,
-    categoryDict,
+   category,
+   updateCategory,
+   deleteCategory,
+   isTemplate,
+   categoryDict,
+   dragHandleProps,
 }: Props) {
-    //
-    const updateRow = (rowIndex: number, newRow: CardRow) => {
-        const updatedRows = structuredClone(category.rows);
-        updatedRows[rowIndex] = newRow;
-        updateCategory({ ...category, rows: updatedRows });
-    };
+   //
+   const updateRow = (rowIndex: number, newRow: CardRow) => {
+      const updatedRows = structuredClone(category.rows);
+      updatedRows[rowIndex] = newRow;
+      updateCategory({ ...category, rows: updatedRows });
+   };
 
-    const deleteRow = (rowIndex: number) => {
-        const updatedRows = structuredClone(category.rows);
-        updatedRows.splice(rowIndex, 1);
-        updateCategory({ ...category, rows: updatedRows });
-    }
+   const deleteRow = (rowIndex: number) => {
+      const updatedRows = structuredClone(category.rows);
+      updatedRows.splice(rowIndex, 1);
+      updateCategory({ ...category, rows: updatedRows });
+   };
 
-    return (
-        <div className={classNames(styles.CardCategory)}>
-            <EditCategoryHeader
-                category={category}
-                updateCategory={updateCategory}
-                deleteCategory={deleteCategory}
-                categoryDict={categoryDict}
+   return (
+      <div className={classNames(styles.CardCategory)}>
+         <EditCategoryHeader
+            category={category}
+            updateCategory={updateCategory}
+            deleteCategory={deleteCategory}
+            categoryDict={categoryDict}
+            dragHandleProps={dragHandleProps}
+         />
+         {category.rows.map((row, rowIndex) => (
+            <EditRow
+               row={row}
+               updateRow={(newRow) => {
+                  updateRow(rowIndex, newRow);
+               }}
+               deleteRow={() => {
+                  deleteRow(rowIndex);
+               }}
+               isTemplate={isTemplate}
+               key={`${category.name} | ${rowIndex} | ${row.label}`}
             />
-            {category.rows.map((row, rowIndex) => (
-                <EditRow
-                    row={row}
-                    updateRow={(newRow) => {
-                        updateRow(rowIndex, newRow);
-                    }}
-                    deleteRow={() => {deleteRow(rowIndex)}}
-                    isTemplate={isTemplate}
-                    key={`${category.name} | ${rowIndex} | ${row.label}`}
-                />
-            ))}
-        </div>
-    );
+         ))}
+      </div>
+   );
 }
