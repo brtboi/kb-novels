@@ -81,6 +81,7 @@ export default function EditCategoryHeader({
 
    return (
       <div className={classNames(styles.CategoryHeader)}>
+         {/* Category Name */}
          <div className={styles.CategoryNameDiv}>
             <button
                {...dragHandleProps}
@@ -101,10 +102,12 @@ export default function EditCategoryHeader({
             />
          </div>
 
+         {/* Add Row Button */}
          <button className={classNames(styles.AddButton)} onClick={addRow}>
             Add Row
          </button>
 
+         {/* Category Settings */}
          <div className={classNames(styles.CategorySettingsDiv)}>
             {isDependenciesDrawerOpen && (
                <div className={classNames(styles.DependenciesDrawer)}>
