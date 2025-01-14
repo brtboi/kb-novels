@@ -1,0 +1,25 @@
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main # Deploy on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18' # Match your project's Node.js version
+
+    - name: Install dependencies
+      run: npm install # Adjust if you're using yarn or pnpm
+
+    - name: Deploy to Firebase
+      run: npx firebase deploy --only hosting --token ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
