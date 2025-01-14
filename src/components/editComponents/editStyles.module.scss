@@ -134,6 +134,35 @@ textarea {
    }
 }
 
+.CardsHeader {
+   display: flex;
+   flex-direction: row;
+   gap: 1rem;
+
+   .SortMenu {
+      position: absolute;
+      z-index: 9999;
+      left: 10rem;
+      
+      display: flex;
+      flex-direction: column;
+      border: 4px solid $fontColor;
+      border-radius: 1rem;
+      background-color: $backgroundColor;
+
+      .SortMenuRow {
+         display: flex;
+         flex-direction: row;
+         justify-content: space-between;
+
+         .SortMenuButtons {
+            display: flex;
+            flex-direction: row;
+         }
+      }
+   }
+}
+
 .Card {
    display: flex;
    flex-direction: row;
@@ -182,7 +211,7 @@ textarea {
 
 .CardCategory {
    $topPadding: 1.5rem;
-   
+
    position: relative;
    display: flex;
    flex-direction: column;

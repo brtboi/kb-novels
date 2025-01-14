@@ -196,6 +196,7 @@ export default function EditCard({
                      <DragDropContext onDragEnd={handleCategoriesDragEnd}>
                         <Droppable
                            droppableId={`CategoryDroppable_${cardIndex}`}
+                           key={`CategoryDroppable_${cardIndex}`}
                         >
                            {(provided) => (
                               <div

@@ -12,6 +12,7 @@ import {
    Droppable,
    DropResult,
 } from "@hello-pangea/dnd";
+import EditCardsHeader from "./EditCardsHeader";
 
 export default function EditPage() {
    const { deckId } = useParams<{ deckId: string }>();
@@ -26,6 +27,10 @@ export default function EditPage() {
 
    const toggleIsCollapsed = (index: number) => {
       setIsCardsCollapsed((prev) => prev.map((e, i) => (i === index ? !e : e)));
+   };
+
+   const toggleIsCollapsedAll = (isCollapsed: boolean) => {
+      setIsCardsCollapsed((prev) => prev.map(() => isCollapsed));
    };
 
    const handleSaveDeck = async () => {
@@ -151,6 +156,7 @@ export default function EditPage() {
                   />
                </p>
 
+               {/* Template Card */}
                <EditCard
                   card={templateCard}
                   cardIndex={0}
@@ -161,7 +167,12 @@ export default function EditPage() {
                      setIsTemplateCollapsed((prev) => !prev);
                   }}
                />
-               <p>Cards:</p>
+
+               <EditCardsHeader
+                  template={templateCard}
+                  setCards={setCards}
+                  toggleIsCollapsedAll={toggleIsCollapsedAll}
+               />
 
                <DragDropContext onDragEnd={handleCardsDragEnd}>
                   <Droppable droppableId="CardsDroppable">
