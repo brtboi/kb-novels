@@ -21,5 +21,8 @@ jobs:
     - name: Install dependencies
       run: npm install # Adjust if you're using yarn or pnpm
 
+    - name: Build project
+      run: npm run build
+
     - name: Deploy to Firebase
       run: npx firebase deploy --only hosting --token ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
