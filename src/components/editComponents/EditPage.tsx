@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Card } from "../../entity/types";
-import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import EditCard from "./EditCard";
 import classNames from "classnames";
@@ -13,6 +13,7 @@ import {
    DropResult,
 } from "@hello-pangea/dnd";
 import EditCardsHeader from "./EditCardsHeader";
+import { getDeckById } from "../../firebase/db";
 
 export default function EditPage() {
    const { deckId } = useParams<{ deckId: string }>();
@@ -118,15 +119,18 @@ export default function EditPage() {
    // fetch cards
    useEffect(() => {
       const fetchCards = async () => {
-         try {
-            const docSnapshot = await getDoc(doc(db, `decks/${deckId}`));
-            const data = docSnapshot.data();
-            const cards: Card[] = JSON.parse(data?.cards);
+         if (!deckId) {
+            console.error("Error: no deckId in URL");
+            return;
+         }
 
-            setDeckName(data?.name);
-            setTemplateCard(JSON.parse(data?.template));
-            setCards(cards);
-            setIsCardsCollapsed(cards.map(() => false));
+         try {
+            const deck = await getDeckById(deckId);
+
+            setDeckName(deck.name);
+            setTemplateCard(deck.template);
+            setCards(deck.cards);
+            setIsCardsCollapsed(deck.cards.map(() => false));
          } catch (e) {
             console.error("Error fetching CARDS", e);
          }

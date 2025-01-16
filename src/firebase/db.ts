@@ -9,7 +9,7 @@ import { Deck } from "../entity/types";
  * @throws {Error} - throws error if no corresponding doc found
  *
  */
-export const deckById = async (deckId: string): Promise<Deck> => {
+export const getDeckById = async (deckId: string): Promise<Deck> => {
     const docRef = doc(db, `decks/${deckId}`);
     const docSnapshot = await getDoc(docRef);
 
@@ -22,7 +22,8 @@ export const deckById = async (deckId: string): Promise<Deck> => {
     return {
         id: deckId,
         name: data.name,
-        cards: data.cards,
+        template: JSON.parse(data.template),
+        cards: JSON.parse(data.cards),
     };
 };
 

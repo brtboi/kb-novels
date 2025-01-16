@@ -1,12 +1,14 @@
-import classNames from "classnames";
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
+import styles from "./homePageStyles.module.scss";
 
 export default function Header() {
-    return (
-        <>
-            <a href="/" className={classNames()}><h1>kb novels</h1></a>
-            <Outlet />
-        </>
-    );
+   return (
+      <div>
+         <Link to="/" className={styles.Header}>
+            <h1>kb novels</h1>
+         </Link>
+         <Outlet />
+      </div>
+   );
 }

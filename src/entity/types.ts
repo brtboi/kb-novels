@@ -32,5 +32,6 @@ export type Card = {
 export type Deck = {
     id: string;
     name: string;
+    template: Card;
     cards: Card[];
 };
