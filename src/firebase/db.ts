@@ -1,6 +1,6 @@
-import { doc, getDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
-import { Deck } from "../entity/types";
+import { Card, Deck } from "../entity/types";
 
 /**
  *
@@ -10,27 +10,41 @@ import { Deck } from "../entity/types";
  *
  */
 export const getDeckById = async (deckId: string): Promise<Deck> => {
-    const docRef = doc(db, `decks/${deckId}`);
-    const docSnapshot = await getDoc(docRef);
+   const docRef = doc(db, `decks/${deckId}`);
+   const docSnapshot = await getDoc(docRef);
 
-    if (!docSnapshot.exists()) {
-        throw new Error(`Deck with deckId ${deckId} not found`);
-    }
+   if (!docSnapshot.exists()) {
+      throw new Error(`Deck with deckId ${deckId} not found`);
+   }
 
-    const data = docSnapshot.data();
+   const data = docSnapshot.data();
 
-    return {
-        id: deckId,
-        name: data.name,
-        template: JSON.parse(data.template),
-        cards: JSON.parse(data.cards),
-    };
+   return {
+      id: deckId,
+      name: data.name,
+      template: JSON.parse(data.template),
+      cards: JSON.parse(data.cards),
+   };
+};
+
+export const createDeck = async (name: string, template: Card, cards: Card[]) => {
+   try {
+      const docRef = await addDoc(collection(db, "decks"), {
+         name: name,
+         template: template,
+         cards: cards,
+      });
+
+      console.log("Doc created successfully with ID:", docRef.id);
+   } catch (error) {
+      console.error("Error saving deck to db:", error);
+   }
 };
 
 /**
  * Test deck:
  * [{"Author":{"Author":["George Orwell","Orwell"]},"Protagonist":{"Protagonist":["Winston Smith"]},"Title":{"Title":["1984"]}},{"Protagonist":{"Protagonist":["Victor Frankenstein"]},"Title":{"Title":["Frankenstein"]},"Author":{"Author":["Mary Shelley","Shelley"]}}]
- * 
- * 
+ *
+ *
  * [{"Title":{"Title":["1984"]},"Author":{"Author":["George Orwell","Orwell"]},"Protagonist":{"Protagonist":["Winston Smith"]}},{"Author":{"Author":["Mary Shelley","Shelley"]},"Protagonist":{"Protagonist":["Victor Frankenstein"]},"Title":{"Title":["Frankenstein"]}}]
  */

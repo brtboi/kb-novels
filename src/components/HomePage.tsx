@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { Deck } from "../entity/types";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,6 +7,7 @@ import styles from "./homePageStyles.module.scss";
 import classNames from "classnames";
 import { ReactComponent as EditIcon } from "../assets/Icons/Edit.svg";
 import { ReactComponent as DuplicateIcon } from "../assets/Icons/Duplicate.svg";
+import { createDeck } from "../firebase/db";
 
 export default function HomePage() {
    const navigate = useNavigate();
@@ -14,26 +15,28 @@ export default function HomePage() {
    const [allDecks, setAllDecks] = useState<Deck[]>([]);
    const [isLoading, setIsLoading] = useState<boolean>(true);
 
+   const duplicateDeck = async (deck: Deck) => {
+      createDeck(`${deck.name} (Copy)`, deck.template, deck.cards);
+   };
+
    useEffect(() => {
-      const fetchAllDecks = async () => {
-         const querySnapshot = await getDocs(collection(db, "decks"));
-         setAllDecks(
-            querySnapshot.docs.map((doc) => {
-               return {
+      const unsubscribe = onSnapshot(
+         collection(db, "decks"),
+         (snapshot) => {
+            setAllDecks(
+               snapshot.docs.map((doc) => ({
                   ...(doc.data() as Deck),
                   id: doc.id,
-               };
-            })
-         );
-      };
+               }))
+            );
+            setIsLoading(false)
+         },
+         (error) => {
+            console.error("Error fetching all Decks,", error);
+         }
+      );
 
-      fetchAllDecks()
-         .then(() => {
-            setIsLoading(false);
-         })
-         .catch((e) => {
-            console.error("Error fetching all decks", e);
-         });
+      return () => unsubscribe();
    }, []);
 
    return (
@@ -53,12 +56,19 @@ export default function HomePage() {
                         style={{ flex: 1 }}
                      >{`${deck.id}: ${deck.name}`}</button>
 
-                     {/* Home Row Buttons */}
+                     {/* Row Buttons */}
                      <div>
-                        <button className={styles.DeckLink}>
+                        {/* Duplicate Button */}
+                        <button
+                           onClick={() => {
+                              duplicateDeck(deck);
+                           }}
+                           className={styles.DeckLink}
+                        >
                            <DuplicateIcon />
                         </button>
 
+                        {/* Edit Button */}
                         <button
                            onClick={() => {
                               navigate(`edit/${deck.id}`);
