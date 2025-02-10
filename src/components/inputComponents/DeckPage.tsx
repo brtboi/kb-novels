@@ -13,11 +13,9 @@ import styles from "./inputStyles.module.scss";
 import SettingsOverlay from "./SettingsOverlay.tsx";
 import { getDeckById } from "../../firebase/db.ts";
 
-type Suit = 0 | 1 | 2 | 3;
-
 type DrawPileItem = {
    cardIndex: number;
-   suit: Suit;
+   suit: 0 | 1 | 2 | 3;
    suitIndex: number;
 };
 
@@ -34,7 +32,11 @@ export default function DeckPage() {
 
    const [cards, setCards] = useState<Card[] | null>(null);
    const [template, setTemplate] = useState<Card | null>(null);
-   const [cardIndex, setCardIndex] = useState<number>(0);
+   const [currentCard, setCurrentCard] = useState<DrawPileItem>({
+      cardIndex: 0,
+      suit: 0,
+      suitIndex: 0,
+   });
    const cardSuits = useRef<number[][]>([[], [], [], []]);
 
    const drawPile = useRef<DrawPileItem[]>([]);
@@ -64,7 +66,14 @@ export default function DeckPage() {
    );
    const fontWidth = (rem * 13.203) / 16;
 
-   const moveCard = (fromSuit: Suit, suitIndex: number, toSuit: Suit) => {
+   const moveCard = (fromSuit: number, suitIndex: number, toSuit: number) => {
+      if (fromSuit < 0 || fromSuit > 3 || toSuit < 0 || toSuit > 3) {
+         console.error(
+            `Error moving card: from fromSuit = ${fromSuit} to toSuit = ${toSuit}`
+         );
+         return;
+      }
+
       const [cardIndex] = cardSuits.current[fromSuit].splice(suitIndex, 1);
       cardSuits.current[toSuit].push(cardIndex);
    };
@@ -73,7 +82,7 @@ export default function DeckPage() {
       (categoryID: string, rowIndex: number) => {
          let index = 0;
 
-         for (const category of cards![cardIndex].categories) {
+         for (const category of cards![currentCard.cardIndex].categories) {
             if (category._ID === categoryID) {
                index += rowIndex;
                break;
@@ -84,7 +93,7 @@ export default function DeckPage() {
 
          return index;
       },
-      [cards, cardIndex]
+      [cards, currentCard]
    );
 
    const getIsAnswerCorrect = useCallback((value: string, row: CardRow) => {
@@ -115,6 +124,20 @@ export default function DeckPage() {
          return row.answers.some((e) => parseFloat(e) === parseFloat(value));
       }
    }, []);
+
+   const focusFirstInput = useCallback(() => {
+      if (cards === null) {
+         console.error("Error focusing first input: cards is null");
+         return;
+      }
+
+      const lastCategory =
+         cards[currentCard.cardIndex].categories[
+            cards[currentCard.cardIndex].categories.length - 1
+         ];
+
+      focusNextInput(lastCategory._ID, lastCategory.rows.length - 1, 1, false);
+   }, [cards, currentCard]);
 
    const moveCaret = (element: HTMLInputElement) => {
       setTimeout(() => {
@@ -190,7 +213,6 @@ export default function DeckPage() {
                focusNextInput(categoryID, rowIndex, 1, true);
                //
             } else {
-               if (cardPerformance.current === 1) cardPerformance.current = 0;
                inputRefs.current[categoryID][rowIndex].current?.select();
             }
 
@@ -220,7 +242,7 @@ export default function DeckPage() {
       setRowStates((prev) => {
          const updatedRowStates = structuredClone(prev);
 
-         for (const category of cards[cardIndex].categories) {
+         for (const category of cards[currentCard.cardIndex].categories) {
             if (category._isSequential) {
                const states = updatedRowStates[category._ID];
 
@@ -242,7 +264,7 @@ export default function DeckPage() {
 
          return updatedRowStates;
       });
-   }, [cards, cardIndex]);
+   }, [cards, currentCard]);
 
    const checkDependencies = useCallback(() => {
       if (!cards) {
@@ -253,7 +275,8 @@ export default function DeckPage() {
       setRowStates((prev) => {
          const updatedRowStates = structuredClone(prev);
 
-         //Record<categoryID, boolean>
+         // Record<categoryID, boolean>
+         // true is all done and false is not done (has some ask or hide)
          const categoryStates = Object.entries(prev).reduce(
             (acc, [categoryID, states]) => ({
                ...acc,
@@ -264,15 +287,22 @@ export default function DeckPage() {
             {} as Record<string, boolean>
          );
 
-         for (const category of cards[cardIndex].categories) {
+         for (const category of cards[currentCard.cardIndex].categories) {
             const isDependeniesFulfilled = _dependencies.current[
                category._ID
             ].every((dependencyID) => categoryStates[dependencyID]);
 
-            // if the category is currently hidden and all of it's dependencies are fulfilled
-            if (
+            // if category setting is show
+            if (categorySettings[category._ID] === STATE.SHOW) {
+               updatedRowStates[category._ID] = prev[category._ID].map(
+                  () => STATE.SHOW
+               );
+
+               // if the category is currently hidden and all of it's dependencies are fulfilled
+            } else if (
                isDependeniesFulfilled &&
-               prev[category._ID]?.every((state) => state === STATE.HIDE)
+               prev[category._ID]?.every((state) => state === STATE.HIDE) &&
+               categorySettings[category._ID] === STATE.ASK
             ) {
                if (category._isSequential) {
                   updatedRowStates[category._ID] = prev[category._ID].map(
@@ -284,7 +314,7 @@ export default function DeckPage() {
                   );
                }
 
-               // if the category isn't STATE.SHOW not STATE.DISABLE and dependencies aren't fulfilled
+               // if the category isn't STATE.SHOW nor STATE.DISABLE and dependencies aren't fulfilled
             } else if (
                !isDependeniesFulfilled &&
                !prev[category._ID]?.every(
@@ -299,7 +329,7 @@ export default function DeckPage() {
 
          return updatedRowStates;
       });
-   }, [cards, cardIndex]);
+   }, [cards, currentCard]);
 
    const changeCategorySettings = useCallback(
       (categoryID: string, newState: STATE) => {
@@ -310,7 +340,7 @@ export default function DeckPage() {
 
             if (
                cards &&
-               !cards[cardIndex].categories.some(
+               !cards[currentCard.cardIndex].categories.some(
                   (category) => category._ID === categoryID
                )
             ) {
@@ -350,7 +380,7 @@ export default function DeckPage() {
             checkDependencies();
          });
       },
-      [cards, cardIndex, checkDependencies, checkIsSequential]
+      [cards, currentCard, checkDependencies, checkIsSequential]
    );
 
    const focusNextInput = useCallback(
@@ -375,7 +405,6 @@ export default function DeckPage() {
                nextIndex !== flatIndex &&
                rowStatesFlat[nextIndex] !== STATE.ASK
             ) {
-               console.log("in the while loop");
                nextIndex =
                   (nextIndex + inputRefsFlat.length + step) %
                   inputRefsFlat.length;
@@ -397,80 +426,89 @@ export default function DeckPage() {
    );
 
    const refillDrawPile = useCallback(() => {
-      // move 5 cards to diamonds from clubs
+      // move 4 cards from suit0 to suit1
       while (
          cardSuits.current[0].length > 0 &&
-         cardSuits.current[1].length < 5
+         cardSuits.current[1].length < 4
       ) {
          const randomIndex = Math.floor(
             Math.random() * cardSuits.current[0].length
          );
 
-         console.log("refill suit1", cardSuits.current[0], randomIndex);
-
          moveCard(0, randomIndex, 1);
       }
 
-      // refill drawPile with diamonds, hearts, and 5 cards from spades
-      if (drawPile.current.length === 0) {
-         const suit3Cards: DrawPileItem[] = [];
+      // push all of suit 2 and suit 1 to draw pile
+      drawPile.current.push(
+         ...cardSuits.current[2].map((cardIndex, suitIndex) => ({
+            cardIndex: cardIndex,
+            suit: 2 as 2,
+            suitIndex: suitIndex,
+         })),
+         ...cardSuits.current[1].map((cardIndex, suitIndex) => ({
+            cardIndex: cardIndex,
+            suit: 1 as 1,
+            suitIndex: suitIndex,
+         }))
+      );
 
-         while (suit3Cards.length < Math.min(5, cardSuits.current[3].length)) {
-            const randomIndex = Math.floor(
-               Math.random() * cardSuits.current[3].length
-            );
-            suit3Cards.push({
-               cardIndex: cardSuits.current[3][randomIndex],
-               suit: 3,
-               suitIndex: randomIndex,
-            });
-         }
+      // refill drawPile with sui1, sui2, and 3 cards from suit3
+      // if (drawPile.current.length === 0) {
+      //    const suit3Cards: DrawPileItem[] = [];
 
-         drawPile.current.push(
-            ...suit3Cards,
-            ...cardSuits.current[2].map((cardIndex, suitIndex) => ({
-               cardIndex: cardIndex,
-               suit: 2 as Suit,
-               suitIndex: suitIndex,
-            })),
-            ...cardSuits.current[1].map((cardIndex, suitIndex) => ({
-               cardIndex: cardIndex,
-               suit: 1 as Suit,
-               suitIndex: suitIndex,
-            }))
-         );
-      }
+      //    while (suit3Cards.length < Math.min(3, cardSuits.current[3].length)) {
+      //       const randomIndex = Math.floor(
+      //          Math.random() * cardSuits.current[3].length
+      //       );
+      //       suit3Cards.push({
+      //          cardIndex: cardSuits.current[3][randomIndex],
+      //          suit: 3,
+      //          suitIndex: randomIndex,
+      //       });
+      //    }
+
+      //    drawPile.current.push(
+      //       ...suit3Cards,
+      //       ...cardSuits.current[2].map((cardIndex, suitIndex) => ({
+      //          cardIndex: cardIndex,
+      //          suit: 2 as Suit,
+      //          suitIndex: suitIndex,
+      //       })),
+      //       ...cardSuits.current[1].map((cardIndex, suitIndex) => ({
+      //          cardIndex: cardIndex,
+      //          suit: 1 as Suit,
+      //          suitIndex: suitIndex,
+      //       }))
+      //    );
+      // }
    }, []);
 
-   const getNextCard = useCallback(() => {
-      console.log("getnextcard", cardSuits);
+   // updates suits, refilldrawpile, & getnextcard
+   const getNextCard = useCallback(
+      (isInit: boolean = false) => {
+         setIsCardDone(false);
 
-      setIsCardDone(false);
+         if (drawPile.current.length === 0) {
+            refillDrawPile();
+            console.log("Draw pile refilled:", drawPile.current);
+         }
 
-      if (drawPile.current.length === 0) {
-         refillDrawPile();
-         setCardIndex(drawPile.current[drawPile.current.length - 1].cardIndex);
+         // isInit === true only when run by the initializing cards useEffect
+         if (!isInit) {
+            const _toSuit = currentCard.suit + cardPerformance.current;
+            const toSuit = Math.min(3, Math.max(1, _toSuit));
+
+            console.log(currentCard, toSuit, cardPerformance);
+            moveCard(currentCard.suit, currentCard.suitIndex, toSuit);
+         }
+
          cardPerformance.current = 1;
-      } else {
-         console.log("I shouldn't be able to see this");
-         const currentCard: DrawPileItem = drawPile.current.pop()!;
+         setCurrentCard(drawPile.current.pop()!);
+      },
+      [refillDrawPile, currentCard]
+   );
 
-         const _toSuit = currentCard.suit + cardPerformance.current;
-         const toSuit: Suit = Math.min(3, Math.max(1, _toSuit)) as Suit;
-         console.log(_toSuit, currentCard.suit, cardPerformance, toSuit)
-
-         moveCard(currentCard.suit, currentCard.suitIndex, toSuit);
-
-         if (drawPile.current.length === 0) refillDrawPile();
-
-         setCardIndex(drawPile.current[0].cardIndex);
-         cardPerformance.current = 1;
-      }
-
-      // setCardIndex(Math.floor(cards!.length * Math.random()));
-   }, [refillDrawPile]);
-
-   // fetch Cards & template from firestore and initialize cardSuits[0]
+   // fetch Cards & template from firestore and initialize cardSuits[0] and cardIndex
    useEffect(() => {
       const fetchCards = async () => {
          if (!deckId) {
@@ -484,6 +522,7 @@ export default function DeckPage() {
             setTemplate(deck.template);
             setCards(deck.cards);
 
+            // initiate category settings to all STATE.ASK
             setCategorySettings(
                deck.template.categories.reduce(
                   (acc, category) => ({
@@ -495,10 +534,9 @@ export default function DeckPage() {
             );
 
             if (cardSuits.current[0].length === 0) {
-               // puts indices 0 to nCards - 1 into box0
+               // initialize suit 0
                cardSuits.current[0] = deck.cards.map((_, i) => i);
-               console.log("hi from fetch cards about to get next card");
-               getNextCard();
+               getNextCard(true);
             }
          } catch (e) {
             console.error("Error fetching CARDS", e);
@@ -515,7 +553,7 @@ export default function DeckPage() {
             {};
          const _rowStates: Record<string, STATE[]> = {};
 
-         cards[cardIndex].categories.forEach((category) => {
+         cards[currentCard.cardIndex].categories.forEach((category) => {
             _inputRefs[category._ID] = category.rows.map(() =>
                createRef<HTMLInputElement>()
             );
@@ -532,44 +570,32 @@ export default function DeckPage() {
 
          setIsFirstLoaded(true);
       }
-   }, [cards, cardIndex, checkDependencies]);
+   }, [cards, currentCard, checkDependencies]);
 
    // Focus First input
    useEffect(() => {
       if (isFirstLoaded && cards !== null) {
-         const lastCategory =
-            cards[cardIndex].categories[cards[cardIndex].categories.length - 1];
-         focusNextInput(
-            lastCategory._ID,
-            lastCategory.rows.length - 1,
-            1,
-            false
-         );
+         focusFirstInput();
          setIsFirstLoaded(false);
       }
-   }, [cardIndex, cards, focusNextInput, isFirstLoaded]);
+   }, [currentCard, cards, focusNextInput, isFirstLoaded]);
 
-   // global key down event listener for enter
+   // global key down event listener for escape and enter
    useEffect(() => {
       const handleGlobalKeyDown = (e: KeyboardEvent) => {
+         // listener for escape/settings overlay
+
          if (e.key === "Escape" && cards) {
             setIsSettings((prev) => {
-               //focus first input when exit settings overlay
+               // focus first input when exit settings overlay
                setTimeout(() => {
-                  focusNextInput(
-                     cards[cardIndex].categories[
-                        cards[cardIndex].categories.length - 1
-                     ]._ID,
-                     cards[cardIndex].categories[
-                        cards[cardIndex].categories.length - 1
-                     ].rows.length - 1,
-                     1,
-                     false
-                  );
+                  focusFirstInput();
                }, 2);
 
                return !prev;
             });
+
+            //listener for enter and card is done
          } else if (e.key === "Enter" && isCardDone) {
             getNextCard();
          }
@@ -589,28 +615,41 @@ export default function DeckPage() {
             // Input Body
             <div className={classNames(styles.InputBody)}>
                {/* Input Categories */}
-               {cards[cardIndex].categories.map((category, categoryIndex) => {
-                  return (
-                     <InputCategory
-                        category={category}
-                        inputRefs={inputRefs.current[category._ID]}
-                        rowStates={rowStates[category._ID]}
-                        handleOnFocus={handleOnFocus}
-                        handleOnBlur={handleOnBlur}
-                        handleOnClick={handleOnClick}
-                        handleKeyDown={(
-                           rowIndex: number,
-                           event: React.KeyboardEvent<HTMLInputElement>,
-                           row: CardRow
-                        ) => {
-                           handleOnKeyDown(category._ID, rowIndex, event, row);
-                        }}
-                        key={`category ${categoryIndex}`}
-                     />
-                  );
-               })}
+               {cards[currentCard.cardIndex].categories.map(
+                  (category, categoryIndex) => {
+                     return (
+                        <InputCategory
+                           category={category}
+                           inputRefs={inputRefs.current[category._ID]}
+                           rowStates={rowStates[category._ID]}
+                           handleOnFocus={handleOnFocus}
+                           handleOnBlur={handleOnBlur}
+                           handleOnClick={handleOnClick}
+                           handleKeyDown={(
+                              rowIndex: number,
+                              event: React.KeyboardEvent<HTMLInputElement>,
+                              row: CardRow
+                           ) => {
+                              handleOnKeyDown(
+                                 category._ID,
+                                 rowIndex,
+                                 event,
+                                 row
+                              );
+                           }}
+                           key={`category ${categoryIndex}`}
+                        />
+                     );
+                  }
+               )}
 
-               <button onClick={getNextCard}>next Card</button>
+               <button
+                  onClick={() => {
+                     getNextCard();
+                  }}
+               >
+                  next Card
+               </button>
 
                <button
                   onClick={() => {
@@ -625,15 +664,15 @@ export default function DeckPage() {
                      console.log(cardSuits, drawPile);
                   }}
                >
-                  piles
+                  cardsuits and drawpile
                </button>
 
                <button
                   onClick={() => {
-                     console.log("cardperformance", cardPerformance.current);
+                     console.log(currentCard, cardPerformance.current);
                   }}
                >
-                  performance
+                  current card & performance
                </button>
 
                <div
