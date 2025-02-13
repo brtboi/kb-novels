@@ -28,7 +28,8 @@ interface CaretData {
 export default function DeckPage() {
    const { deckId } = useParams<{ deckId: string }>();
 
-   const [isFirstLoaded, setIsFirstLoaded] = useState<boolean>(true);
+   const [isPageFirstLoaded, setIsPageFirstLoaded] = useState<boolean>(true);
+   const [isCardFirstLoaded, setIsCardFirstLoaded] = useState<boolean>(true);
 
    const [cards, setCards] = useState<Card[] | null>(null);
    const [template, setTemplate] = useState<Card | null>(null);
@@ -53,6 +54,8 @@ export default function DeckPage() {
       Record<string, STATE>
    >({});
    const [isSettings, setIsSettings] = useState<boolean>(false);
+   // redo mode if something in the card was incorrect
+   const [isRedo, setIsRedo] = useState<boolean>(false);
 
    const [isCardDone, setIsCardDone] = useState<boolean>(false);
 
@@ -209,6 +212,7 @@ export default function DeckPage() {
             } else if (value === "idk") {
                inputRefs.current[categoryID][rowIndex].current!.value = "";
                cardPerformance.current = -1;
+               setIsRedo(true);
                updateRowState(categoryID, rowIndex, STATE.INCORRECT);
                focusNextInput(categoryID, rowIndex, 1, true);
                //
@@ -232,6 +236,26 @@ export default function DeckPage() {
             moveCaret(event.currentTarget);
       }
    };
+
+   const redo = useCallback(() => {
+      setIsRedo(false);
+      setIsCardDone(false);
+      setRowStates((prev) => {
+         const _rowStates = structuredClone(prev);
+
+         for (const [category, states] of Object.entries(prev)) {
+            for (const stateIndex in states) {
+               if (states[stateIndex] === STATE.INCORRECT) {
+                  _rowStates[category][stateIndex] = STATE.ASK;
+               }
+            }
+         }
+
+         return _rowStates;
+      });
+
+      focusFirstInput();
+   }, [focusFirstInput]);
 
    const checkIsSequential = useCallback(() => {
       if (!cards) {
@@ -266,6 +290,7 @@ export default function DeckPage() {
       });
    }, [cards, currentCard]);
 
+   // lowkey checks settings as well. more like check categories
    const checkDependencies = useCallback(() => {
       if (!cards) {
          console.error("Error: cards is null");
@@ -329,10 +354,11 @@ export default function DeckPage() {
 
          return updatedRowStates;
       });
-   }, [cards, currentCard]);
+   }, [cards, currentCard, categorySettings]);
 
    const changeCategorySettings = useCallback(
       (categoryID: string, newState: STATE) => {
+         console.log("change category settings run");
          setCategorySettings((prevCategorySettings) => {
             const _updatedCategorySettings =
                structuredClone(prevCategorySettings);
@@ -438,6 +464,19 @@ export default function DeckPage() {
          moveCard(0, randomIndex, 1);
       }
 
+      const _suit3 = [];
+      while (cardSuits.current[3].length > 0 && _suit3.length < 3) {
+         const randomIndex = Math.floor(
+            Math.random() * cardSuits.current[3].length
+         );
+
+         _suit3.push({
+            cardIndex: cardSuits.current[3][randomIndex],
+            suit: 3 as 3,
+            suitIndex: randomIndex,
+         });
+      }
+
       // push all of suit 2 and suit 1 to draw pile
       drawPile.current.push(
          ...cardSuits.current[2].map((cardIndex, suitIndex) => ({
@@ -449,7 +488,8 @@ export default function DeckPage() {
             cardIndex: cardIndex,
             suit: 1 as 1,
             suitIndex: suitIndex,
-         }))
+         })),
+         ...structuredClone(_suit3)
       );
 
       // refill drawPile with sui1, sui2, and 3 cards from suit3
@@ -483,10 +523,11 @@ export default function DeckPage() {
       // }
    }, []);
 
-   // updates suits, refilldrawpile, & getnextcard
+   // updates suits, refilldrawpile, & getnextcard & reset redo
    const getNextCard = useCallback(
       (isInit: boolean = false) => {
          setIsCardDone(false);
+         setIsRedo(false);
 
          if (drawPile.current.length === 0) {
             refillDrawPile();
@@ -522,6 +563,7 @@ export default function DeckPage() {
             setTemplate(deck.template);
             setCards(deck.cards);
 
+            console.log("fetch cards and template from firestore effected");
             // initiate category settings to all STATE.ASK
             setCategorySettings(
                deck.template.categories.reduce(
@@ -541,10 +583,14 @@ export default function DeckPage() {
          } catch (e) {
             console.error("Error fetching CARDS", e);
          }
+
+         setIsPageFirstLoaded(false);
       };
 
-      fetchCards();
-   }, [deckId, getNextCard]);
+      if (isPageFirstLoaded) {
+         fetchCards();
+      }
+   }, [deckId, getNextCard, isPageFirstLoaded]);
 
    // Initialize inputRefs & rowStates & _dependencies & _isSequential
    useEffect(() => {
@@ -568,17 +614,17 @@ export default function DeckPage() {
          setRowStates(_rowStates);
          checkDependencies();
 
-         setIsFirstLoaded(true);
+         setIsCardFirstLoaded(true);
       }
    }, [cards, currentCard, checkDependencies]);
 
    // Focus First input
    useEffect(() => {
-      if (isFirstLoaded && cards !== null) {
+      if (isCardFirstLoaded && cards !== null) {
          focusFirstInput();
-         setIsFirstLoaded(false);
+         setIsCardFirstLoaded(false);
       }
-   }, [currentCard, cards, focusNextInput, isFirstLoaded]);
+   }, [currentCard, cards, focusNextInput, isCardFirstLoaded]);
 
    // global key down event listener for escape and enter
    useEffect(() => {
@@ -597,6 +643,11 @@ export default function DeckPage() {
 
             //listener for enter and card is done
          } else if (e.key === "Enter" && isCardDone) {
+            if (isRedo) {
+               redo();
+               return;
+            }
+
             getNextCard();
          }
       };
@@ -653,10 +704,10 @@ export default function DeckPage() {
 
                <button
                   onClick={() => {
-                     console.log(rowStates);
+                     console.log(rowStates, categorySettings);
                   }}
                >
-                  rowStates
+                  rowStates & category settings
                </button>
 
                <button
