@@ -47,8 +47,8 @@ export default function EditCategoryHeader({
       const newRow: CardRow = {
          label: `Row_${category.rows.length}`,
          answers: [""],
-         _type: "text",
-         _isCaseSensitive: false,
+         type: "text",
+         cased: false,
       };
 
       updateCategory({ ...category, rows: [...category.rows, newRow] });
@@ -56,28 +56,28 @@ export default function EditCategoryHeader({
 
    const toggleDependency = useCallback(
       (categoryID: string) => {
-         const updatedDependencies = category._dependencies.includes(categoryID)
-            ? category._dependencies.filter((e) => e !== categoryID)
-            : [...category._dependencies, categoryID];
-         updateCategory({ ...category, _dependencies: updatedDependencies });
+         const updatedDependencies = category.deps.includes(categoryID)
+            ? category.deps.filter((e) => e !== categoryID)
+            : [...category.deps, categoryID];
+         updateCategory({ ...category, deps: updatedDependencies });
       },
       [category, updateCategory]
    );
 
    const ToggleIsSequential = () => {
-      updateCategory({ ...category, _isSequential: !category._isSequential });
+      updateCategory({ ...category, seq: !category.seq });
    };
 
    const ToggleIsShuffled = () => {
-      updateCategory({ ...category, _isShuffled: !category._isShuffled });
+      updateCategory({ ...category, shfl: !category.shfl });
    };
 
    useEffect(() => {
-      category._dependencies.forEach((categoryID) => {
+      category.deps.forEach((categoryID) => {
          if (!Object.keys(categoryDict).includes(categoryID))
             toggleDependency(categoryID);
       });
-   }, [categoryDict, category._dependencies, toggleDependency]);
+   }, [categoryDict, category.deps, toggleDependency]);
 
    return (
       <div className={classNames(styles.CategoryHeader)}>
@@ -121,7 +121,7 @@ export default function EditCategoryHeader({
                               className={classNames(styles.DependenciesRow)}
                               key={`${category.name} dependencies ${dependenciesRowIndex} ${categoryID}`}
                            >
-                              {category._dependencies.includes(categoryID) ? (
+                              {category.deps.includes(categoryID) ? (
                                  <CheckBoxOn />
                               ) : (
                                  <CheckBoxOff />
@@ -135,7 +135,7 @@ export default function EditCategoryHeader({
 
             <button
                className={classNames(styles.SettingsButton, {
-                  [styles.toggleOn]: category._dependencies.length > 0,
+                  [styles.toggleOn]: category.deps.length > 0,
                })}
                onClick={() => {
                   setIsDependenciesDrawerOpen((prev) => !prev);
@@ -145,7 +145,7 @@ export default function EditCategoryHeader({
             </button>
             <button
                className={classNames(styles.SettingsButton, {
-                  [styles.toggleOn]: category._isSequential === true,
+                  [styles.toggleOn]: category.seq === true,
                })}
                onClick={ToggleIsSequential}
             >
@@ -153,7 +153,7 @@ export default function EditCategoryHeader({
             </button>
             <button
                className={classNames(styles.SettingsButton, {
-                  [styles.toggleOn]: category._isShuffled === true,
+                  [styles.toggleOn]: category.shfl === true,
                })}
                onClick={ToggleIsShuffled}
             >

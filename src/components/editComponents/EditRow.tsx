@@ -38,8 +38,8 @@ export default function Row({
    const [label, setLabel] = useState<string>(row.label);
    const [answers, setAnswers] = useState<string[]>(row.answers);
 
-   const rowTypesArr = getRowTypesArr(row._type);
-   const [rowType, setRowType] = useState<RowType>(row._type);
+   const rowTypesArr = getRowTypesArr(row.type);
+   const [rowType, setRowType] = useState<RowType>(row.type);
    const [isRowTypesOpen, setIsRowTypesOpen] = useState<boolean>(false);
 
    const handleLabelOnBlur = () => {
@@ -78,14 +78,14 @@ export default function Row({
 
    const updateRowType = (newRowType: RowType) => {
       setTimeout(() => {
-         updateRow({ ...structuredClone(row), _type: newRowType });
+         updateRow({ ...structuredClone(row), type: newRowType });
       }, 500);
    };
 
    const toggleIsCaseSensitive = () => {
       updateRow({
          ...structuredClone(row),
-         _isCaseSensitive: !row._isCaseSensitive,
+         cased: !row.cased,
       });
    };
 
@@ -199,7 +199,7 @@ export default function Row({
                <button
                   onClick={toggleIsCaseSensitive}
                   className={classNames(styles.SettingsButton, {
-                     [styles.toggleOn]: row._isCaseSensitive,
+                     [styles.toggleOn]: row.cased,
                   })}
                >
                   <CaseSensitiveIcon className={classNames(styles.Icon)} />

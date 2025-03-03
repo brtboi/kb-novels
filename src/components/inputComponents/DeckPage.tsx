@@ -46,7 +46,7 @@ export default function DeckPage() {
    const inputRefs = useRef<
       Record<string, React.RefObject<HTMLInputElement>[]>
    >({});
-   const _isSequential = useRef<Record<string, boolean>>({});
+   const sequential = useRef<Record<string, boolean>>({});
    const _dependencies = useRef<Record<string, string[]>>({});
 
    const [rowStates, setRowStates] = useState<Record<string, STATE[]>>({});
@@ -85,7 +85,7 @@ export default function DeckPage() {
       (categoryID: string, rowIndex: number) => {
          let index = 0;
 
-         for (const category of cards![currentCard.cardIndex].categories) {
+         for (const category of cards![currentCard.cardIndex].cats) {
             if (category._ID === categoryID) {
                index += rowIndex;
                break;
@@ -100,7 +100,7 @@ export default function DeckPage() {
    );
 
    const getIsAnswerCorrect = useCallback((value: string, row: CardRow) => {
-      if (row._type === "name") {
+      if (row.type === "name") {
          const allPossibleNames = [];
 
          for (const name of row.answers) {
@@ -113,17 +113,13 @@ export default function DeckPage() {
          }
 
          return allPossibleNames.some((e) =>
-            row._isCaseSensitive
-               ? e === value
-               : e.toUpperCase() === value.toUpperCase()
+            row.cased ? e === value : e.toUpperCase() === value.toUpperCase()
          );
-      } else if (row._type === "text") {
+      } else if (row.type === "text") {
          return row.answers.some((e) =>
-            row._isCaseSensitive
-               ? e === value
-               : e.toUpperCase() === value.toUpperCase()
+            row.cased ? e === value : e.toUpperCase() === value.toUpperCase()
          );
-      } else if (row._type === "number") {
+      } else if (row.type === "number") {
          return row.answers.some((e) => parseFloat(e) === parseFloat(value));
       }
    }, []);
@@ -135,8 +131,8 @@ export default function DeckPage() {
       }
 
       const lastCategory =
-         cards[currentCard.cardIndex].categories[
-            cards[currentCard.cardIndex].categories.length - 1
+         cards[currentCard.cardIndex].cats[
+            cards[currentCard.cardIndex].cats.length - 1
          ];
 
       focusNextInput(lastCategory._ID, lastCategory.rows.length - 1, 1, false);
@@ -266,8 +262,8 @@ export default function DeckPage() {
       setRowStates((prev) => {
          const updatedRowStates = structuredClone(prev);
 
-         for (const category of cards[currentCard.cardIndex].categories) {
-            if (category._isSequential) {
+         for (const category of cards[currentCard.cardIndex].cats) {
+            if (category.seq) {
                const states = updatedRowStates[category._ID];
 
                for (let i = 1; i < states.length; i++) {
@@ -312,7 +308,7 @@ export default function DeckPage() {
             {} as Record<string, boolean>
          );
 
-         for (const category of cards[currentCard.cardIndex].categories) {
+         for (const category of cards[currentCard.cardIndex].cats) {
             const isDependeniesFulfilled = _dependencies.current[
                category._ID
             ].every((dependencyID) => categoryStates[dependencyID]);
@@ -329,7 +325,7 @@ export default function DeckPage() {
                prev[category._ID]?.every((state) => state === STATE.HIDE) &&
                categorySettings[category._ID] === STATE.ASK
             ) {
-               if (category._isSequential) {
+               if (category.seq) {
                   updatedRowStates[category._ID] = prev[category._ID].map(
                      (_, i) => (i === 0 ? STATE.ASK : STATE.HIDE)
                   );
@@ -366,7 +362,7 @@ export default function DeckPage() {
 
             if (
                cards &&
-               !cards[currentCard.cardIndex].categories.some(
+               !cards[currentCard.cardIndex].cats.some(
                   (category) => category._ID === categoryID
                )
             ) {
@@ -566,7 +562,7 @@ export default function DeckPage() {
             console.log("fetch cards and template from firestore effected");
             // initiate category settings to all STATE.ASK
             setCategorySettings(
-               deck.template.categories.reduce(
+               deck.template.cats.reduce(
                   (acc, category) => ({
                      ...acc,
                      [category._ID]: STATE.ASK,
@@ -592,22 +588,22 @@ export default function DeckPage() {
       }
    }, [deckId, getNextCard, isPageFirstLoaded]);
 
-   // Initialize inputRefs & rowStates & _dependencies & _isSequential
+   // Initialize inputRefs & rowStates & _dependencies & sequential
    useEffect(() => {
       if (cards) {
          const _inputRefs: Record<string, React.RefObject<HTMLInputElement>[]> =
             {};
          const _rowStates: Record<string, STATE[]> = {};
 
-         cards[currentCard.cardIndex].categories.forEach((category) => {
+         cards[currentCard.cardIndex].cats.forEach((category) => {
             _inputRefs[category._ID] = category.rows.map(() =>
                createRef<HTMLInputElement>()
             );
 
             _rowStates[category._ID] = category.rows.map(() => STATE.HIDE);
 
-            _dependencies.current[category._ID] = category._dependencies;
-            _isSequential.current[category._ID] = category._isSequential;
+            _dependencies.current[category._ID] = category.deps;
+            sequential.current[category._ID] = category.seq;
          });
 
          inputRefs.current = _inputRefs;
@@ -666,7 +662,7 @@ export default function DeckPage() {
             // Input Body
             <div className={classNames(styles.InputBody)}>
                {/* Input Categories */}
-               {cards[currentCard.cardIndex].categories.map(
+               {cards[currentCard.cardIndex].cats.map(
                   (category, categoryIndex) => {
                      return (
                         <InputCategory

@@ -21,8 +21,7 @@ export default function EditCardsHeader({
    const sortCards = (categoryID: string, direction: 1 | -1) => {
       // get the actual answer i'm sorting by (first answer of first row of category specified)
       const getFirstRow = (card: Card) =>
-         card.categories.find((category) => category._ID === categoryID)
-            ?.rows[0];
+         card.cats.find((category) => category._ID === categoryID)?.rows[0];
 
       const getFirstAnswer = (card: Card) => {
          try {
@@ -32,7 +31,7 @@ export default function EditCardsHeader({
          }
       };
 
-      const isNumber = getFirstRow(template)?._type === ("number" as RowType);
+      const isNumber = getFirstRow(template)?.type === ("number" as RowType);
 
       setCards((prev) => {
          const _prev = structuredClone(prev);
@@ -78,7 +77,7 @@ export default function EditCardsHeader({
          {/* Sort Menu */}
          {isSortMenuOpen && (
             <div className={styles.SortMenu}>
-               {template.categories.map((category) => (
+               {template.cats.map((category) => (
                   <div className={styles.SortMenuRow}>
                      <p>{category.name}</p>
                      {/* Sort Menu Buttons */}

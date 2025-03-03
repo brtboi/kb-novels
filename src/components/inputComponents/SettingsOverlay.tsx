@@ -66,7 +66,7 @@ export default function SettingsOverlay({
 
     // initialize buttonRefs
     useEffect(() => {
-        buttonRefs.current = template.categories.map(() =>
+        buttonRefs.current = template.cats.map(() =>
             createRef<HTMLButtonElement>()
         );
     }, [template]);
@@ -88,7 +88,7 @@ export default function SettingsOverlay({
         >
             <div className={classNames(styles.SettingsDiv)}>
                 <p>settings test</p>
-                {template.categories.map((category, index) => (
+                {template.cats.map((category, index) => (
                     <button
                         className={classNames(styles.SettingsButton)}
                         onMouseOver={handleOnMouseOver}

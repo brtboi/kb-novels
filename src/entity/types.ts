@@ -1,37 +1,37 @@
 export enum STATE {
-    ASK = "ask",
-    SHOW = "show",
-    HIDE = "hide",
-    CORRECT = "correct",
-    INCORRECT = "incorrect",
-    DISABLE = "disable",
+   ASK = "ask",
+   SHOW = "show",
+   HIDE = "hide",
+   CORRECT = "correct",
+   INCORRECT = "incorrect",
+   DISABLE = "disable",
 }
 
 export type RowType = "text" | "name" | "number";
 
 export type CardRow = {
-    label: string;
-    answers: string[];
-    _type: RowType;
-    _isCaseSensitive: boolean;
+   label: string;
+   answers: string[];
+   type: RowType;
+   cased: boolean;
 };
 
 export type CardCategory = {
-    _ID: string;
-    _dependencies: string[];
-    _isShuffled: boolean;
-    _isSequential: boolean;
-    name: string;
-    rows: CardRow[];
+   _ID: string;
+   deps: string[];
+   shfl: boolean;
+   seq: boolean;
+   name: string;
+   rows: CardRow[];
 };
 
 export type Card = {
-    categories: CardCategory[];
+   cats: CardCategory[];
 };
 
 export type Deck = {
-    id: string;
-    name: string;
-    template: Card;
-    cards: Card[];
+   id: string;
+   name: string;
+   template: Card;
+   cards: Card[];
 };

@@ -138,7 +138,7 @@ export default function EditPage() {
 
       if (deckId === "new") {
          setDeckName("");
-         setTemplateCard({ categories: [] });
+         setTemplateCard({ cats: [] });
          setCards([]);
       } else {
          fetchCards();

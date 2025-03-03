@@ -58,41 +58,41 @@ export default function EditCard({
    >([]);
 
    const categoryDict: Record<string, string> = Object.fromEntries(
-      card.categories.map((category) => [category._ID, category.name])
+      card.cats.map((category) => [category._ID, category.name])
    );
 
    const handleUpdateCategory = (
       categoryIndex: number,
       newCategory: CardCategory
    ) => {
-      const updatedCategories = [...card.categories];
+      const updatedCategories = [...card.cats];
       updatedCategories[categoryIndex] = newCategory;
 
-      updateCard({ ...card, categories: updatedCategories });
+      updateCard({ ...card, cats: updatedCategories });
    };
 
    const handleAddCategory = (newCategory?: CardCategory) => {
       const blankCategory = {
-         _dependencies: [],
-         _isShuffled: false,
-         _isSequential: false,
+         deps: [],
+         shfl: false,
+         seq: false,
          _ID: `${new Date().toISOString()}-${Math.random()}`,
-         name: `Category_${card.categories.length}`,
+         name: `Category_${card.cats.length}`,
          rows: [],
       };
       const newCard: Card = {
          ...card,
-         categories: [...card.categories, newCategory ?? blankCategory],
+         cats: [...card.cats, newCategory ?? blankCategory],
       };
 
       updateCard(newCard);
    };
 
    const deleteCategory = (categoryIndex: number) => {
-      const updatedCategories = [...card.categories];
+      const updatedCategories = [...card.cats];
       updatedCategories.splice(categoryIndex, 1);
 
-      updateCard({ ...card, categories: updatedCategories });
+      updateCard({ ...card, cats: updatedCategories });
    };
 
    const handleCategoriesDragEnd = (result: DropResult<string>) => {
@@ -101,19 +101,19 @@ export default function EditCard({
       if (!destination) return; // Dropped outside a valid destination
       if (destination.index === source.index) return; // No change in position
 
-      const _updatedCategories = structuredClone(card.categories);
+      const _updatedCategories = structuredClone(card.cats);
       const [movedCategory] = _updatedCategories.splice(source.index, 1);
       _updatedCategories.splice(destination.index, 0, movedCategory);
 
-      updateCard({ ...card, categories: _updatedCategories });
+      updateCard({ ...card, cats: _updatedCategories });
    };
 
    useEffect(() => {
       if (!isTemplate) {
          setExtraTemplateCategories(
-            template.categories.filter(
+            template.cats.filter(
                (templateCategory) =>
-                  !card.categories.some(
+                  !card.cats.some(
                      (cardCategory) => templateCategory._ID === cardCategory._ID
                   )
             )
@@ -175,7 +175,7 @@ export default function EditCard({
                   {isCollapsed && (
                      <p>
                         &nbsp;
-                        {`${card.categories[0].rows[0].label}: ${card.categories[0].rows[0].answers[0]} |`}
+                        {`${card.cats[0].rows[0].label}: ${card.cats[0].rows[0].answers[0]} |`}
                      </p>
                   )}
                   {/*  */}
@@ -204,45 +204,43 @@ export default function EditCard({
                                  {...provided.droppableProps}
                                  ref={provided.innerRef}
                               >
-                                 {card.categories.map(
-                                    (category, categoryIndex) => (
-                                       <Draggable
-                                          index={categoryIndex}
-                                          draggableId={`Category ${cardIndex}|${categoryIndex}`}
-                                          key={`Category ${cardIndex}|${categoryIndex}`}
-                                       >
-                                          {(provided) => (
-                                             <div
-                                                {...provided.draggableProps}
-                                                ref={provided.innerRef}
-                                             >
-                                                <EditCategory
-                                                   category={category}
-                                                   updateCategory={(
+                                 {card.cats.map((category, categoryIndex) => (
+                                    <Draggable
+                                       index={categoryIndex}
+                                       draggableId={`Category ${cardIndex}|${categoryIndex}`}
+                                       key={`Category ${cardIndex}|${categoryIndex}`}
+                                    >
+                                       {(provided) => (
+                                          <div
+                                             {...provided.draggableProps}
+                                             ref={provided.innerRef}
+                                          >
+                                             <EditCategory
+                                                category={category}
+                                                updateCategory={(
+                                                   newCategory
+                                                ) => {
+                                                   handleUpdateCategory(
+                                                      categoryIndex,
                                                       newCategory
-                                                   ) => {
-                                                      handleUpdateCategory(
-                                                         categoryIndex,
-                                                         newCategory
-                                                      );
-                                                   }}
-                                                   deleteCategory={() => {
-                                                      deleteCategory(
-                                                         categoryIndex
-                                                      );
-                                                   }}
-                                                   isTemplate={isTemplate}
-                                                   categoryDict={categoryDict}
-                                                   dragHandleProps={
-                                                      provided.dragHandleProps
-                                                   }
-                                                   key={`category ${category.name} | ${categoryIndex}`}
-                                                />
-                                             </div>
-                                          )}
-                                       </Draggable>
-                                    )
-                                 )}
+                                                   );
+                                                }}
+                                                deleteCategory={() => {
+                                                   deleteCategory(
+                                                      categoryIndex
+                                                   );
+                                                }}
+                                                isTemplate={isTemplate}
+                                                categoryDict={categoryDict}
+                                                dragHandleProps={
+                                                   provided.dragHandleProps
+                                                }
+                                                key={`category ${category.name} | ${categoryIndex}`}
+                                             />
+                                          </div>
+                                       )}
+                                    </Draggable>
+                                 ))}
                                  {provided.placeholder}
                               </div>
                            )}
