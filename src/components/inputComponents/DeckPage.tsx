@@ -21,6 +21,7 @@ type DrawPileItem = {
 
 interface CaretData {
    active: boolean;
+   element: HTMLInputElement | null;
    top: number;
    left: number;
 }
@@ -61,13 +62,14 @@ export default function DeckPage() {
 
    const [caretData, setCaretData] = useState<CaretData>({
       active: false,
+      element: null,
       top: 0,
       left: 0,
    });
-   const rem = parseFloat(
-      window.getComputedStyle(document.documentElement).fontSize
-   );
-   const fontWidth = (rem * 13.203) / 16;
+
+   // for the last p element to get fontWidth
+   const fontTestElement = useRef<HTMLParagraphElement>(null);
+   const fontWidth = useRef<number>(0);
 
    const moveCard = (fromSuit: number, suitIndex: number, toSuit: number) => {
       if (fromSuit < 0 || fromSuit > 3 || toSuit < 0 || toSuit > 3) {
@@ -143,8 +145,9 @@ export default function DeckPage() {
          const rect = element.getBoundingClientRect();
          setCaretData({
             active: true,
+            element: element,
             top: rect.top,
-            left: rect.left + (element.selectionStart || 0) * fontWidth,
+            left: rect.left + (element.selectionStart || 0) * fontWidth.current,
          });
       }, 2);
    };
@@ -545,6 +548,14 @@ export default function DeckPage() {
       [refillDrawPile, currentCard]
    );
 
+   // set fontWidth
+   useEffect(() => {
+      if (fontTestElement.current !== null && fontWidth.current === 0) {
+         fontWidth.current =
+            fontTestElement.current.getBoundingClientRect().width;
+      }
+   }, []);
+
    // fetch Cards & template from firestore and initialize cardSuits[0] and cardIndex
    useEffect(() => {
       const fetchCards = async () => {
@@ -626,8 +637,8 @@ export default function DeckPage() {
    useEffect(() => {
       const handleGlobalKeyDown = (e: KeyboardEvent) => {
          // listener for escape/settings overlay
-
          if (e.key === "Escape" && cards) {
+            e.preventDefault();
             setIsSettings((prev) => {
                // focus first input when exit settings overlay
                setTimeout(() => {
@@ -648,8 +659,22 @@ export default function DeckPage() {
          }
       };
 
+      const updateCaret = () => {
+         if (!caretData.element) {
+            return;
+         }
+         moveCaret(caretData.element);
+      };
+
       document.addEventListener("keydown", handleGlobalKeyDown);
-      return () => document.removeEventListener("keydown", handleGlobalKeyDown);
+      window.addEventListener("scroll", updateCaret);
+      window.addEventListener("resize", updateCaret);
+
+      return () => {
+         document.removeEventListener("keydown", handleGlobalKeyDown);
+         window.removeEventListener("scroll", updateCaret);
+         window.removeEventListener("resize", updateCaret);
+      };
    });
 
    return (
@@ -741,6 +766,10 @@ export default function DeckPage() {
          ) : (
             <p>Loading...</p>
          )}
+
+         <div style={{ display: "flex", opacity: 0 }}>
+            <p ref={fontTestElement}>m</p>
+         </div>
       </>
    );
 }
