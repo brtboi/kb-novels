@@ -1,4 +1,11 @@
-import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import {
+   addDoc,
+   collection,
+   deleteDoc,
+   doc,
+   getDoc,
+   setDoc,
+} from "firebase/firestore";
 import { db } from "./firebase";
 import { Card, Deck } from "../entity/types";
 
@@ -40,12 +47,31 @@ export const createDeck = async (docContent?: Deck): Promise<string> => {
            cards: JSON.stringify([]),
         };
 
-        console.log("document: ", document)
+   console.log("document: ", document);
 
-   const docRef = await addDoc(collection(db, "decks"), {...document});
+   const docRef = await addDoc(collection(db, "decks"), { ...document });
 
    console.log("Doc created successfully with ID:", docRef.id);
    return docRef.id;
+};
+
+export const deleteDeck = async (docId: string) => {
+   const docRefOld = doc(db, "decks", docId);
+   const docRefNew = doc(db, "deletedDecks", docId);
+
+   try {
+      const docSnap = await getDoc(docRefOld);
+
+      if (docSnap.exists()) {
+         await setDoc(docRefNew, docSnap.data());
+         await deleteDoc(docRefOld);
+         console.log(`Document moved from /decks to /deletedDecks`);
+      } else {
+         throw new Error(`Error: document with id ${docId} does not exist`);
+      }
+   } catch (error) {
+      throw new Error(`Error moving document: ${error}`);
+   }
 };
 
 // export const createDeck = async (name: string, template: Card, cards: Card[]) => {

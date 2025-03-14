@@ -7,7 +7,8 @@ import styles from "./homePageStyles.module.scss";
 import classNames from "classnames";
 import { ReactComponent as EditIcon } from "../assets/Icons/Edit.svg";
 import { ReactComponent as DuplicateIcon } from "../assets/Icons/Duplicate.svg";
-import { createDeck } from "../firebase/db";
+import { ReactComponent as DeleteIcon } from "../assets/Icons/Delete.svg";
+import { createDeck, deleteDeck } from "../firebase/db";
 
 export default function HomePage() {
    const navigate = useNavigate();
@@ -34,6 +35,19 @@ export default function HomePage() {
          template: deck.template,
          cards: deck.cards,
       });
+   };
+
+   const handleDeleteDeck = async (docId: string) => {
+      if (window.confirm(`Are you sure you wanna delete document ${docId}`)) {
+         try {
+            deleteDeck(docId);
+            window.alert(
+               `document with id ${docId} successfully deleted. if you didn't mean to do this, brent can get it back for you for $5`
+            );
+         } catch (error) {
+            window.alert(`Error deleting document with id ${docId}`);
+         }
+      }
    };
 
    // listens for updates to db decklist
@@ -75,13 +89,13 @@ export default function HomePage() {
                      >{`${deck.id}: ${deck.name}`}</button>
 
                      {/* Row Buttons */}
-                     <div>
+                     <div className={styles.RowButtonsDiv}>
                         {/* Duplicate Button */}
                         <button
                            onClick={() => {
                               duplicateDeck(deck);
                            }}
-                           className={styles.DeckLink}
+                           className={styles.RowButton}
                         >
                            <DuplicateIcon />
                         </button>
@@ -91,9 +105,18 @@ export default function HomePage() {
                            onClick={() => {
                               navigate(`edit/${deck.id}`);
                            }}
-                           className={styles.DeckLink}
+                           className={styles.RowButton}
                         >
                            <EditIcon />
+                        </button>
+
+                        <button
+                           onClick={() => {
+                              handleDeleteDeck(deck.id);
+                           }}
+                           className={styles.RowButton}
+                        >
+                           <DeleteIcon />
                         </button>
                      </div>
                   </div>

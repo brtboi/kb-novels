@@ -14,13 +14,27 @@
       flex-direction: row;
       justify-content: space-between;
 
+      &:hover {
+         background-color: $fontColorSecondary;
+      }
+
       .DeckLink {
          color: $fontColor;
          text-align: left;
+      }
 
-         &:hover {
-            background-color: $fontColorSecondary;
+      .RowButtonsDiv {
+         display: flex;
+         flex-direction: row;
+         align-items: center;
 
+         .RowButton {
+            display: flex;
+            align-items: center;
+
+            &:hover {
+               background-color: $primaryColor;
+            }
          }
       }
    }
