@@ -15,10 +15,28 @@ export default function HomePage() {
    const [allDecks, setAllDecks] = useState<Deck[]>([]);
    const [isLoading, setIsLoading] = useState<boolean>(true);
 
-   const duplicateDeck = async (deck: Deck) => {
-      createDeck(`${deck.name} (Copy)`, deck.template, deck.cards);
+   const handleNewDeck = async () => {
+      try {
+         const docId = await createDeck();
+         navigate(`/edit/${docId}`);
+      } catch (error) {
+         console.error("Error: couldn't create new document");
+         window.alert(
+            "Error creating new deck try again later maybe idk ¯\\_(ツ)_/¯"
+         );
+      }
    };
 
+   const duplicateDeck = async (deck: Deck) => {
+      createDeck({
+         id: "",
+         name: `${deck.name} (Copy)`,
+         template: deck.template,
+         cards: deck.cards,
+      });
+   };
+
+   // listens for updates to db decklist
    useEffect(() => {
       const unsubscribe = onSnapshot(
          collection(db, "decks"),
@@ -29,7 +47,7 @@ export default function HomePage() {
                   id: doc.id,
                }))
             );
-            setIsLoading(false)
+            setIsLoading(false);
          },
          (error) => {
             console.error("Error fetching all Decks,", error);
@@ -81,12 +99,7 @@ export default function HomePage() {
                   </div>
                ))}
                <div className={styles.HomePageRow}>
-                  <button
-                     onClick={() => {
-                        navigate(`/edit/new`);
-                     }}
-                     className={styles.DeckLink}
-                  >
+                  <button onClick={handleNewDeck} className={styles.DeckLink}>
                      New Deck
                   </button>
                </div>

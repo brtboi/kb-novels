@@ -27,19 +27,40 @@ export const getDeckById = async (deckId: string): Promise<Deck> => {
    };
 };
 
-export const createDeck = async (name: string, template: Card, cards: Card[]) => {
-   try {
-      const docRef = await addDoc(collection(db, "decks"), {
-         name: name,
-         template: template,
-         cards: cards,
-      });
+export const createDeck = async (docContent?: Deck): Promise<string> => {
+   const document = docContent
+      ? {
+           name: docContent.name,
+           template: docContent.template,
+           cards: docContent.cards,
+        }
+      : {
+           name: "new deck",
+           template: JSON.stringify({ cats: [] }),
+           cards: JSON.stringify([]),
+        };
 
-      console.log("Doc created successfully with ID:", docRef.id);
-   } catch (error) {
-      console.error("Error saving deck to db:", error);
-   }
+        console.log("document: ", document)
+
+   const docRef = await addDoc(collection(db, "decks"), {...document});
+
+   console.log("Doc created successfully with ID:", docRef.id);
+   return docRef.id;
 };
+
+// export const createDeck = async (name: string, template: Card, cards: Card[]) => {
+//    try {
+//       const docRef = await addDoc(collection(db, "decks"), {
+//          name: name,
+//          template: template,
+//          cards: cards,
+//       });
+
+//       console.log("Doc created successfully with ID:", docRef.id);
+//    } catch (error) {
+//       console.error("Error saving deck to db:", error);
+//    }
+// };
 
 /**
  * Test deck:
