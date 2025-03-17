@@ -175,7 +175,7 @@ export default function EditCard({
                   {isCollapsed && (
                      <p>
                         &nbsp;
-                        {`${card.cats[0].rows[0].label}: ${card.cats[0].rows[0].answers[0]} |`}
+                        {`${card.cats[0]?.rows[0]?.label ?? "*blank*"}: ${card.cats[0]?.rows[0]?.answers[0] ?? "*blank*"} |`}
                      </p>
                   )}
                   {/*  */}
