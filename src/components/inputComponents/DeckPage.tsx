@@ -62,6 +62,9 @@ export default function DeckPage() {
       Record<string, STATE>
    >({});
    const [isSettings, setIsSettings] = useState<boolean>(false);
+
+   // review mode
+   const [isReview, setIsReview] = useState<boolean>(false);
    // redo mode if something in the card was incorrect
    const [isRedo, setIsRedo] = useState<boolean>(false);
 
@@ -90,6 +93,7 @@ export default function DeckPage() {
          console.error(
             `Error moving card: from fromSuit = ${fromSuit} to toSuit = ${toSuit}. fromSuit does not have value = ${value}`
          );
+         return;
       }
 
       cardSuits.current[fromSuit].delete(value);
@@ -255,6 +259,28 @@ export default function DeckPage() {
          default:
             moveCaret(event.currentTarget);
       }
+   };
+
+   const startReview = () => {
+      if (!cards) {
+         console.error("Error starting review: cards is null");
+         return;
+      }
+      setIsReview(true);
+
+      cardSuits.current = [
+         new Set(cards.map((_, i) => i)),
+         new Set(),
+         new Set(),
+         new Set(),
+      ];
+
+      drawPile.current = cards.map((_, i) => ({
+         cardIndex: i,
+         suit: 0 as 0,
+      }));
+
+      getNextCard(true);
    };
 
    const redo = useCallback(() => {
@@ -549,14 +575,21 @@ export default function DeckPage() {
          setIsRedo(false);
 
          if (drawPile.current.length === 0) {
+            if (isReview) {
+               setIsReview(false)
+            }
             refillDrawPile();
             console.log("Draw pile refilled:", drawPile.current);
          }
 
-         // isInit === true only when run by the initializing cards useEffect
+         // isInit === true only when run by the initializing cards useEffect or by startReivew
          if (!isInit) {
             const _toSuit = currentCard.suit + cardPerformance.current;
-            const toSuit = Math.min(3, Math.max(1, _toSuit));
+            let toSuit = Math.min(3, Math.max(1, _toSuit));
+
+            if (isReview) {
+               toSuit = cardPerformance.current === 1 ? 3 : 0;
+            }
 
             console.log(currentCard, toSuit, cardPerformance);
             moveCard(currentCard.suit, currentCard.cardIndex, toSuit);
@@ -781,6 +814,7 @@ export default function DeckPage() {
                   template={template}
                   categorySettings={categorySettings}
                   changeCategorySettings={changeCategorySettings}
+                  startReview={startReview}
                />
             </div>
          ) : (
