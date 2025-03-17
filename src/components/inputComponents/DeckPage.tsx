@@ -16,7 +16,7 @@ import { getDeckById } from "../../firebase/db.ts";
 type DrawPileItem = {
    cardIndex: number;
    suit: 0 | 1 | 2 | 3;
-   suitIndex: number;
+   // suitIndex: number;
 };
 
 interface CaretData {
@@ -37,11 +37,18 @@ export default function DeckPage() {
    const [currentCard, setCurrentCard] = useState<DrawPileItem>({
       cardIndex: 0,
       suit: 0,
-      suitIndex: 0,
+      // suitIndex: 0,
    });
-   const cardSuits = useRef<number[][]>([[], [], [], []]);
 
-   const drawPile = useRef<DrawPileItem[]>([]);
+   const cardSuits = useRef<Set<number>[]>([
+      new Set(),
+      new Set(),
+      new Set(),
+      new Set(),
+   ]);
+
+   // const drawPile = useRef<DrawPileItem[]>([]);
+   const drawPile = useRef<Array<DrawPileItem>>([]);
    const cardPerformance = useRef<-1 | 0 | 1>(1);
 
    const inputRefs = useRef<
@@ -71,7 +78,7 @@ export default function DeckPage() {
    const fontTestElement = useRef<HTMLParagraphElement>(null);
    const fontWidth = useRef<number>(0);
 
-   const moveCard = (fromSuit: number, suitIndex: number, toSuit: number) => {
+   const moveCard = (fromSuit: number, value: number, toSuit: number) => {
       if (fromSuit < 0 || fromSuit > 3 || toSuit < 0 || toSuit > 3) {
          console.error(
             `Error moving card: from fromSuit = ${fromSuit} to toSuit = ${toSuit}`
@@ -79,8 +86,22 @@ export default function DeckPage() {
          return;
       }
 
-      const [cardIndex] = cardSuits.current[fromSuit].splice(suitIndex, 1);
-      cardSuits.current[toSuit].push(cardIndex);
+      if (!cardSuits.current[fromSuit].has(value)) {
+         console.error(
+            `Error moving card: from fromSuit = ${fromSuit} to toSuit = ${toSuit}. fromSuit does not have value = ${value}`
+         );
+      }
+
+      cardSuits.current[fromSuit].delete(value);
+      cardSuits.current[toSuit].add(value);
+   };
+
+   const getRandomCards = (fromSuit: number, n: number): Array<number> => {
+      const toMove = Array.from(cardSuits.current[fromSuit])
+         .sort(() => Math.random() - 0.5)
+         .splice(0, Math.min(n, cardSuits.current[fromSuit].size));
+
+      return toMove;
    };
 
    const getFlatIndex = useCallback(
@@ -451,45 +472,44 @@ export default function DeckPage() {
    );
 
    const refillDrawPile = useCallback(() => {
-      // move 4 cards from suit0 to suit1
-      while (
-         cardSuits.current[0].length > 0 &&
-         cardSuits.current[1].length < 4
-      ) {
-         const randomIndex = Math.floor(
-            Math.random() * cardSuits.current[0].length
-         );
+      // 4 random values from suit0
+      const _randomSuit0 = getRandomCards(0, 4);
 
-         moveCard(0, randomIndex, 1);
-      }
+      _randomSuit0.forEach((value) => {
+         moveCard(0, value, 1);
+      });
 
-      const _suit3 = [];
-      while (cardSuits.current[3].length > 0 && _suit3.length < 3) {
-         const randomIndex = Math.floor(
-            Math.random() * cardSuits.current[3].length
-         );
+      const _randomSuit3: DrawPileItem[] = getRandomCards(3, 3).map((i) => ({
+         cardIndex: i,
+         suit: 3,
+      }));
 
-         _suit3.push({
-            cardIndex: cardSuits.current[3][randomIndex],
-            suit: 3 as 3,
-            suitIndex: randomIndex,
-         });
-      }
+      drawPile.current.push(
+         ..._randomSuit3,
+         ...[...cardSuits.current[2]].map((i) => ({
+            cardIndex: i,
+            suit: 2 as 2,
+         })),
+         ...[...cardSuits.current[1]].map((i) => ({
+            cardIndex: i,
+            suit: 1 as 1,
+         }))
+      );
 
       // push all of suit 2 and suit 1 to draw pile
-      drawPile.current.push(
-         ...cardSuits.current[2].map((cardIndex, suitIndex) => ({
-            cardIndex: cardIndex,
-            suit: 2 as 2,
-            suitIndex: suitIndex,
-         })),
-         ...cardSuits.current[1].map((cardIndex, suitIndex) => ({
-            cardIndex: cardIndex,
-            suit: 1 as 1,
-            suitIndex: suitIndex,
-         })),
-         ...structuredClone(_suit3)
-      );
+      // drawPile.current.push(
+      //    ...cardSuits.current[2].map((cardIndex, suitIndex) => ({
+      //       cardIndex: cardIndex,
+      //       suit: 2 as 2,
+      //       suitIndex: suitIndex,
+      //    })),
+      //    ...cardSuits.current[1].map((cardIndex, suitIndex) => ({
+      //       cardIndex: cardIndex,
+      //       suit: 1 as 1,
+      //       suitIndex: suitIndex,
+      //    })),
+      //    ...structuredClone(_suit3)
+      // );
 
       // refill drawPile with sui1, sui2, and 3 cards from suit3
       // if (drawPile.current.length === 0) {
@@ -539,7 +559,7 @@ export default function DeckPage() {
             const toSuit = Math.min(3, Math.max(1, _toSuit));
 
             console.log(currentCard, toSuit, cardPerformance);
-            moveCard(currentCard.suit, currentCard.suitIndex, toSuit);
+            moveCard(currentCard.suit, currentCard.cardIndex, toSuit);
          }
 
          cardPerformance.current = 1;
@@ -582,9 +602,9 @@ export default function DeckPage() {
                )
             );
 
-            if (cardSuits.current[0].length === 0) {
+            if (cardSuits.current[0].size === 0) {
                // initialize suit 0
-               cardSuits.current[0] = deck.cards.map((_, i) => i);
+               cardSuits.current[0] = new Set(deck.cards.map((_, i) => i));
                getNextCard(true);
             }
          } catch (e) {
