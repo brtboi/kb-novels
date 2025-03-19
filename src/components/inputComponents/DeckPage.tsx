@@ -47,8 +47,8 @@ export default function DeckPage() {
       new Set(),
    ]);
 
-   // const drawPile = useRef<DrawPileItem[]>([]);
    const drawPile = useRef<Array<DrawPileItem>>([]);
+   // const drawPileSettings = 
    const cardPerformance = useRef<-1 | 0 | 1>(1);
 
    const inputRefs = useRef<
@@ -499,7 +499,7 @@ export default function DeckPage() {
 
    const refillDrawPile = useCallback(() => {
       // 4 random values from suit0
-      const _randomSuit0 = getRandomCards(0, 4);
+      const _randomSuit0 = getRandomCards(0, 4 - cardSuits.current[1].size);
 
       _randomSuit0.forEach((value) => {
          moveCard(0, value, 1);
