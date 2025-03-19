@@ -7,7 +7,7 @@ import {
    setDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { Card, Deck } from "../entity/types";
+import { Deck } from "../entity/types";
 
 /**
  *

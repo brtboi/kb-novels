@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import styles from "./inputStyles.module.scss";
 import { Card, CardCategory, STATE } from "../../entity/types";
-import { createRef, useEffect, useRef } from "react";
+import React, { createRef, useEffect, useRef } from "react";
 
 interface Props {
    isSettings: boolean;

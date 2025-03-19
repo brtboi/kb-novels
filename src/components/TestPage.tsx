@@ -4,7 +4,7 @@ import {
     Droppable,
     DropResult,
 } from "@hello-pangea/dnd";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "../entity/types";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
@@ -72,9 +72,9 @@ export default function TestPage() {
                                                 >
                                                     -
                                                 </span>
-                                                {card.categories.map(
+                                                {card.cats.map(
                                                     (category) => (
-                                                        <div>{category.name}</div>
+                                                        <div key={`test card ${cardIndex}`}>{category.name}</div>
                                                     )
                                                 )}
                                             </div>

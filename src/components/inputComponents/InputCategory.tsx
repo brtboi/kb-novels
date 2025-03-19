@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { CardCategory, CardRow, STATE } from "../../entity/types.ts";
 import InputRow from "./InputRow.tsx";
 

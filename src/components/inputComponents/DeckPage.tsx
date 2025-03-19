@@ -48,7 +48,7 @@ export default function DeckPage() {
    ]);
 
    const drawPile = useRef<Array<DrawPileItem>>([]);
-   // const drawPileSettings = 
+   // const drawPileSettings =
    const cardPerformance = useRef<-1 | 0 | 1>(1);
 
    const inputRefs = useRef<
@@ -151,6 +151,48 @@ export default function DeckPage() {
       }
    }, []);
 
+   const focusNextInput = useCallback(
+      (
+         categoryID: string,
+         rowIndex: number,
+         step: -1 | 1,
+         isRowAnswered: boolean
+      ) => {
+         const inputRefsFlat = Array.from(
+            Object.values(inputRefs.current)
+         ).flat();
+
+         setRowStates((prev) => {
+            const flatIndex = getFlatIndex(categoryID, rowIndex);
+            const rowStatesFlat = Array.from(Object.values(prev)).flat();
+
+            let nextIndex =
+               (flatIndex + inputRefsFlat.length + step) % inputRefsFlat.length;
+
+            while (
+               nextIndex !== flatIndex &&
+               rowStatesFlat[nextIndex] !== STATE.ASK
+            ) {
+               nextIndex =
+                  (nextIndex + inputRefsFlat.length + step) %
+                  inputRefsFlat.length;
+            }
+
+            if (nextIndex === flatIndex && isRowAnswered) {
+               setTimeout(() => {
+                  setIsCardDone(true);
+               }, 10);
+            }
+
+            setTimeout(() => {
+               inputRefsFlat[nextIndex].current?.focus();
+            });
+            return prev;
+         });
+      },
+      [getFlatIndex]
+   );
+
    const focusFirstInput = useCallback(() => {
       if (cards === null) {
          console.error("Error focusing first input: cards is null");
@@ -163,7 +205,7 @@ export default function DeckPage() {
          ];
 
       focusNextInput(lastCategory._ID, lastCategory.rows.length - 1, 1, false);
-   }, [cards, currentCard]);
+   }, [cards, currentCard, focusNextInput]);
 
    const moveCaret = (element: HTMLInputElement) => {
       setTimeout(() => {
@@ -220,7 +262,7 @@ export default function DeckPage() {
    ) => {
       const value = event.currentTarget.value;
       switch (event.key) {
-         case "Enter":
+         case "Enter": {
             event.preventDefault();
             const isAnswerCorrect = getIsAnswerCorrect(value, row);
 
@@ -245,6 +287,7 @@ export default function DeckPage() {
             }
 
             break;
+         }
 
          case "ArrowUp":
             event.preventDefault();
@@ -277,7 +320,7 @@ export default function DeckPage() {
 
       drawPile.current = cards.map((_, i) => ({
          cardIndex: i,
-         suit: 0 as 0,
+         suit: 0 as const,
       }));
 
       getNextCard(true);
@@ -426,19 +469,19 @@ export default function DeckPage() {
                   case STATE.ASK:
                      _updatedRowStates[categoryID] = prevRowStates[
                         categoryID
-                     ].map((_) => STATE.HIDE);
+                     ].map(() => STATE.HIDE);
                      break;
 
                   case STATE.SHOW:
                      _updatedRowStates[categoryID] = prevRowStates[
                         categoryID
-                     ].map((_) => STATE.SHOW);
+                     ].map(() => STATE.SHOW);
                      break;
 
                   case STATE.DISABLE:
                      _updatedRowStates[categoryID] = prevRowStates[
                         categoryID
-                     ].map((_) => STATE.DISABLE);
+                     ].map(() => STATE.DISABLE);
                }
 
                return _updatedRowStates;
@@ -453,48 +496,6 @@ export default function DeckPage() {
          });
       },
       [cards, currentCard, checkDependencies, checkIsSequential]
-   );
-
-   const focusNextInput = useCallback(
-      (
-         categoryID: string,
-         rowIndex: number,
-         step: -1 | 1,
-         isRowAnswered: boolean
-      ) => {
-         const inputRefsFlat = Array.from(
-            Object.values(inputRefs.current)
-         ).flat();
-
-         setRowStates((prev) => {
-            const flatIndex = getFlatIndex(categoryID, rowIndex);
-            const rowStatesFlat = Array.from(Object.values(prev)).flat();
-
-            let nextIndex =
-               (flatIndex + inputRefsFlat.length + step) % inputRefsFlat.length;
-
-            while (
-               nextIndex !== flatIndex &&
-               rowStatesFlat[nextIndex] !== STATE.ASK
-            ) {
-               nextIndex =
-                  (nextIndex + inputRefsFlat.length + step) %
-                  inputRefsFlat.length;
-            }
-
-            if (nextIndex === flatIndex && isRowAnswered) {
-               setTimeout(() => {
-                  setIsCardDone(true);
-               }, 10);
-            }
-
-            setTimeout(() => {
-               inputRefsFlat[nextIndex].current?.focus();
-            });
-            return prev;
-         });
-      },
-      [getFlatIndex]
    );
 
    const refillDrawPile = useCallback(() => {
@@ -514,11 +515,11 @@ export default function DeckPage() {
          ..._randomSuit3,
          ...[...cardSuits.current[2]].map((i) => ({
             cardIndex: i,
-            suit: 2 as 2,
+            suit: 2 as const,
          })),
          ...[...cardSuits.current[1]].map((i) => ({
             cardIndex: i,
-            suit: 1 as 1,
+            suit: 1 as const,
          }))
       );
 
@@ -576,7 +577,7 @@ export default function DeckPage() {
 
          if (drawPile.current.length === 0) {
             if (isReview) {
-               setIsReview(false)
+               setIsReview(false);
             }
             refillDrawPile();
             console.log("Draw pile refilled:", drawPile.current);
@@ -598,7 +599,7 @@ export default function DeckPage() {
          cardPerformance.current = 1;
          setCurrentCard(drawPile.current.pop()!);
       },
-      [refillDrawPile, currentCard]
+      [refillDrawPile, currentCard, isReview]
    );
 
    // set fontWidth
@@ -684,7 +685,7 @@ export default function DeckPage() {
          focusFirstInput();
          setIsCardFirstLoaded(false);
       }
-   }, [currentCard, cards, focusNextInput, isCardFirstLoaded]);
+   }, [currentCard, cards, focusFirstInput, isCardFirstLoaded]);
 
    // global key down event listener for escape and enter
    useEffect(() => {

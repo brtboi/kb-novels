@@ -7,11 +7,14 @@ import pluginReactHooks from "eslint-plugin-react-hooks";
 export default [
    { files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"] },
    { languageOptions: { globals: globals.browser } },
-   { ignores: ["node_modules", ".firebase", "build"] },
+   { ignores: ["node_modules", ".firebase", "build", "functions"] },
    { settings: { react: { version: "detect" } } },
    pluginJs.configs.recommended,
    ...tseslint.configs.recommended,
    pluginReact.configs.flat.recommended,
    { plugins: { "react-hooks": pluginReactHooks } },
-   { rules: { "react-hooks/exhaustive-deps": "warn" } }, // Ensure this is enabled
+   { rules: { 
+       "react-hooks/exhaustive-deps": "warn",
+       "@typescript-eslint/no-unused-expressions": ["warn", { "allowShortCircuit": true }] // Correctly define allowShortCircuit
+   } },
 ];

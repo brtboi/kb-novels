@@ -8,7 +8,7 @@ import { ReactComponent as IsShuffledIcon } from "../../assets/Icons/Shuffle.svg
 import { ReactComponent as DeleteIcon } from "../../assets/Icons/Delete.svg";
 import { ReactComponent as ReorderIcon } from "../../assets/Icons/Reorder.svg";
 import { CardCategory, CardRow } from "../../entity/types";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 
 interface Props {

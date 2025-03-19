@@ -21,9 +21,9 @@ export default function HomePage() {
          const docId = await createDeck();
          navigate(`/edit/${docId}`);
       } catch (error) {
-         console.error("Error: couldn't create new document");
+         console.error("Error: couldn't create new document", error);
          window.alert(
-            "Error creating new deck try again later maybe idk ¯\\_(ツ)_/¯"
+            `Error creating new deck try again later maybe idk ¯\\_(ツ)_/¯ \n Error: ${error}`
          );
       }
    };
@@ -45,7 +45,7 @@ export default function HomePage() {
                `document with id ${docId} successfully deleted. if you didn't mean to do this, brent can get it back for you for $5`
             );
          } catch (error) {
-            window.alert(`Error deleting document with id ${docId}`);
+            window.alert(`Error deleting document with id ${docId}: ${error}`);
          }
       }
    };

@@ -2,7 +2,7 @@ import { Card, RowType } from "../../entity/types";
 import styles from "./editStyles.module.scss";
 import { ReactComponent as ArrowUpIcon } from "../../assets/Icons/ArrowUp.svg";
 import { ReactComponent as ArrowDownIcon } from "../../assets/Icons/ArrowDown.svg";
-import { useState } from "react";
+import React, { useState } from "react";
 
 interface Props {
    template: Card;
@@ -24,10 +24,12 @@ export default function EditCardsHeader({
          card.cats.find((category) => category._ID === categoryID)?.rows[0];
 
       const getFirstAnswer = (card: Card) => {
-         try {
-            return getFirstRow(card)?.answers[0] || "";
-         } catch (error) {
+         if (!getFirstRow(card)) {
             return "";
+         } else if (!getFirstRow(card)?.answers) {
+            return "";
+         } else {
+            return getFirstRow(card)?.answers[0] || "";
          }
       };
 
@@ -77,8 +79,11 @@ export default function EditCardsHeader({
          {/* Sort Menu */}
          {isSortMenuOpen && (
             <div className={styles.SortMenu}>
-               {template.cats.map((category) => (
-                  <div className={styles.SortMenuRow}>
+               {template.cats.map((category, categoryIndex) => (
+                  <div
+                     className={styles.SortMenuRow}
+                     key={`Sort menu category ${categoryIndex}`}
+                  >
                      <p>{category.name}</p>
                      {/* Sort Menu Buttons */}
                      <div className={styles.SortMenuButtons}>
