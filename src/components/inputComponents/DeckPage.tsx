@@ -589,7 +589,7 @@ export default function DeckPage() {
       //       }))
       //    );
       // }
-   }, []);
+   }, [drawPileSettings]);
 
    // updates suits, refilldrawpile, & getnextcard & reset redo
    const getNextCard = useCallback(

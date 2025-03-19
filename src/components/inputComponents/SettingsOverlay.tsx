@@ -123,7 +123,10 @@ export default function SettingsOverlay({
 
             <div className={styles.BottomSettingsDiv}>
                {[1, 2, 3].map((suitNumber) => (
-                  <div className={styles.DrawPileSettingsRow}>
+                  <div
+                     className={styles.DrawPileSettingsRow}
+                     key={`drawpilesettings row ${suitNumber}`}
+                  >
                      <p>{`Suit ${suitNumber}`}</p>
                      <input
                         type="number"
