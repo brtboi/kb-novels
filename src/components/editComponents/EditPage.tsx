@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "../../entity/types";
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import EditCard from "./EditCard";
 import classNames from "classnames";
@@ -52,11 +52,15 @@ export default function EditPage() {
       } else {
          const docRef = doc(db, `decks/${deckId}`);
          try {
-            await updateDoc(docRef, {
-               name: deckName,
-               template: JSON.stringify(templateCard),
-               cards: JSON.stringify(cards),
-            });
+            await setDoc(
+               docRef,
+               {
+                  name: deckName,
+                  template: JSON.stringify(templateCard),
+                  cards: JSON.stringify(cards),
+               },
+               { merge: true }
+            );
 
             console.log("Doc successfully saved");
          } catch (error) {
