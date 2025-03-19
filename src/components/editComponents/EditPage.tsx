@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "../../entity/types";
 import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
@@ -16,6 +16,8 @@ import EditCardsHeader from "./EditCardsHeader";
 import { getDeckById } from "../../firebase/db";
 
 export default function EditPage() {
+   const navigate = useNavigate();
+
    const { deckId } = useParams<{ deckId: string }>();
 
    const [deckName, setDeckName] = useState<string | null>(null);
@@ -244,6 +246,13 @@ export default function EditPage() {
                   print cards
                </button>
                <button onClick={handleSaveDeck}>Save Deck</button>
+               <button
+                  onClick={() => {
+                     navigate(-1);
+                  }}
+               >
+                  back
+               </button>
             </div>
          ) : (
             <p>loading...</p>
