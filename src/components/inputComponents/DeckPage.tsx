@@ -16,7 +16,6 @@ import { getDeckById } from "../../firebase/db.ts";
 type DrawPileItem = {
    cardIndex: number;
    suit: 0 | 1 | 2 | 3;
-   // suitIndex: number;
 };
 
 interface CaretData {
@@ -24,6 +23,12 @@ interface CaretData {
    element: HTMLInputElement | null;
    top: number;
    left: number;
+}
+
+interface DrawPileSettings {
+   1: number;
+   2: number;
+   3: number;
 }
 
 export default function DeckPage() {
@@ -37,7 +42,6 @@ export default function DeckPage() {
    const [currentCard, setCurrentCard] = useState<DrawPileItem>({
       cardIndex: 0,
       suit: 0,
-      // suitIndex: 0,
    });
 
    const cardSuits = useRef<Set<number>[]>([
@@ -48,7 +52,19 @@ export default function DeckPage() {
    ]);
 
    const drawPile = useRef<Array<DrawPileItem>>([]);
-   // const drawPileSettings =
+   const [drawPileSettings, setDrawPileSettings] = useState<DrawPileSettings>({
+      1: 4,
+      2: 9999,
+      3: 3,
+   });
+   const changeDrawPileSettings = (suitNumber: 1 | 2 | 3, newValue: number) => {
+      setDrawPileSettings((prev) => {
+         const _newSettings = { ...prev };
+         _newSettings[suitNumber] = newValue < 0 ? 3 : newValue;
+         return _newSettings;
+      });
+   };
+
    const cardPerformance = useRef<-1 | 0 | 1>(1);
 
    const inputRefs = useRef<
@@ -500,13 +516,19 @@ export default function DeckPage() {
 
    const refillDrawPile = useCallback(() => {
       // 4 random values from suit0
-      const _randomSuit0 = getRandomCards(0, 4 - cardSuits.current[1].size);
+      const _randomSuit0 = getRandomCards(
+         0,
+         drawPileSettings[1] - cardSuits.current[1].size
+      );
 
       _randomSuit0.forEach((value) => {
          moveCard(0, value, 1);
       });
 
-      const _randomSuit3: DrawPileItem[] = getRandomCards(3, 3).map((i) => ({
+      const _randomSuit3: DrawPileItem[] = getRandomCards(
+         3,
+         drawPileSettings[3]
+      ).map((i) => ({
          cardIndex: i,
          suit: 3,
       }));
@@ -815,6 +837,8 @@ export default function DeckPage() {
                   template={template}
                   categorySettings={categorySettings}
                   changeCategorySettings={changeCategorySettings}
+                  drawPileSettings={drawPileSettings}
+                  changeDrawPileSettings={changeDrawPileSettings}
                   startReview={startReview}
                />
             </div>

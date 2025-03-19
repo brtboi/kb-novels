@@ -3,11 +3,19 @@ import styles from "./inputStyles.module.scss";
 import { Card, CardCategory, STATE } from "../../entity/types";
 import React, { createRef, useEffect, useRef } from "react";
 
+interface DrawPileSettings {
+   1: number;
+   2: number;
+   3: number;
+}
+
 interface Props {
    isSettings: boolean;
    template: Card;
    categorySettings: Record<string, STATE>;
    changeCategorySettings: (categoryID: string, newState: STATE) => void;
+   drawPileSettings: DrawPileSettings;
+   changeDrawPileSettings: (suitNumber: 1 | 2 | 3, newValue: number) => void;
    startReview: () => void;
 }
 
@@ -16,6 +24,8 @@ export default function SettingsOverlay({
    template,
    categorySettings,
    changeCategorySettings,
+   drawPileSettings,
+   changeDrawPileSettings,
    startReview,
 }: Props) {
    //
@@ -111,14 +121,29 @@ export default function SettingsOverlay({
                </button>
             ))}
 
-            <div
-               style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  flex: 10,
-                  justifyContent: "end",
-               }}
-            >
+            <div className={styles.BottomSettingsDiv}>
+               {[1, 2, 3].map((suitNumber) => (
+                  <div className={styles.DrawPileSettingsRow}>
+                     <p>{`Suit ${suitNumber}`}</p>
+                     <input
+                        type="number"
+                        value={
+                           drawPileSettings[
+                              suitNumber as keyof DrawPileSettings
+                           ]
+                        }
+                        onChange={(e) => {
+                           changeDrawPileSettings(
+                              suitNumber as keyof DrawPileSettings,
+                              Number(e.currentTarget.value)
+                           );
+                        }}
+                        min={1}
+                        step={1}
+                     />
+                  </div>
+               ))}
+
                <button
                   className={styles.SettingsButton}
                   onMouseOver={handleOnMouseOver}

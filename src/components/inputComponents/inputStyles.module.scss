@@ -125,5 +125,18 @@
             background-color: grey;
          }
       }
+
+      .BottomSettingsDiv {
+         display: flex;
+         flex-direction: column;
+         flex: 10;
+         justify-content: end;
+
+         .DrawPileSettingsRow {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+         }
+      }
    }
 }
