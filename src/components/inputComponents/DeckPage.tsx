@@ -278,7 +278,10 @@ export default function DeckPage() {
    ) => {
       const value = event.currentTarget.value;
       switch (event.key) {
-         case "Enter": {
+         case "Enter":
+         case "Go":
+         case "Done":
+         case "Next": {
             event.preventDefault();
             const isAnswerCorrect = getIsAnswerCorrect(value, row);
 
