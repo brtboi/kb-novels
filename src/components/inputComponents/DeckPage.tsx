@@ -822,6 +822,13 @@ export default function DeckPage() {
                >
                   current card & performance
                </button>
+               <button
+                  onClick={() => {
+                     setIsSettings(true);
+                  }}
+               >
+                  settings
+               </button>
 
                <div
                   className={classNames(styles.Caret)}
@@ -834,6 +841,7 @@ export default function DeckPage() {
 
                <SettingsOverlay
                   isSettings={isSettings}
+                  setIsSettings={setIsSettings}
                   template={template}
                   categorySettings={categorySettings}
                   changeCategorySettings={changeCategorySettings}

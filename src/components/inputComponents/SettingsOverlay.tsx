@@ -11,6 +11,7 @@ interface DrawPileSettings {
 
 interface Props {
    isSettings: boolean;
+   setIsSettings: React.Dispatch<React.SetStateAction<boolean>>;
    template: Card;
    categorySettings: Record<string, STATE>;
    changeCategorySettings: (categoryID: string, newState: STATE) => void;
@@ -21,6 +22,7 @@ interface Props {
 
 export default function SettingsOverlay({
    isSettings,
+   setIsSettings,
    template,
    categorySettings,
    changeCategorySettings,
@@ -91,13 +93,19 @@ export default function SettingsOverlay({
 
    return (
       <div
+         onClick={() => {setIsSettings(false)}}
          className={classNames(styles.SettingsOverlay)}
          style={{
             opacity: isSettings ? 1 : 0,
             pointerEvents: isSettings ? "auto" : "none",
          }}
       >
-         <div className={classNames(styles.SettingsDiv)}>
+         <div
+            onClick={(e) => {
+               e.stopPropagation();
+            }}
+            className={classNames(styles.SettingsDiv)}
+         >
             <p>settings test</p>
 
             {/* settings buttons. one per category */}
