@@ -32,6 +32,7 @@ const InputRow = React.forwardRef<HTMLInputElement, Props>(
                   type="text"
                   autoComplete="off"
                   spellCheck="false"
+                  enterKeyHint="enter"
                   onFocus={handleOnFocus}
                   onBlur={handleOnBlur}
                   onClick={handleOnClick}
