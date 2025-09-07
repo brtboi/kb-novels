@@ -1,6 +1,6 @@
-# Getting Started with Create React App
+# kb-novels
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A little study app I originally made for me and my knowledge bowl team to study for novels, but which has since been used by my classmates to study whatever.
 
 ## Available Scripts
 
