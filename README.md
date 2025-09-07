@@ -1,6 +1,6 @@
 # kb-novels
 
-A little study app I originally made for me and my knowledge bowl team to study for novels, but which has since been used by my classmates to study whatever.
+A little study app I originally made for me and my knowledge bowl team to study for novels, but which has since been used by my classmates to study whatever. Be sure to read over the help page in top right corner because this website lowkey doesn't make sense.
 
 ## Available Scripts
 
