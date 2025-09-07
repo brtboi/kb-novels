@@ -802,7 +802,7 @@ export default function DeckPage() {
                   next Card
                </button>
 
-               <button
+               {/* <button
                   onClick={() => {
                      console.log(rowStates, categorySettings);
                   }}
@@ -824,7 +824,7 @@ export default function DeckPage() {
                   }}
                >
                   current card & performance
-               </button>
+               </button> */}
                <button
                   onClick={() => {
                      setIsSettings(true);

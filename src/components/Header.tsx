@@ -7,7 +7,7 @@ export default function Header() {
       <div>
          <Link to="/" className={styles.Header}>
             <h1>kb novels</h1>
-            <p>omfl</p>
+            <Link to="/help">HELP</Link>
          </Link>
          <Outlet />
       </div>

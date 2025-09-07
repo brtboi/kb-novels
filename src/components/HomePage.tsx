@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { Deck } from "../entity/types";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styles from "./homePageStyles.module.scss";
 import classNames from "classnames";
 import { ReactComponent as EditIcon } from "../assets/Icons/Edit.svg";
@@ -126,9 +126,6 @@ export default function HomePage() {
                      New Deck
                   </button>
                </div>
-               <Link to={`/test`} className={styles.DeckLink}>
-                  Test page
-               </Link>
             </div>
          )}
       </>
