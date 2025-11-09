@@ -59,7 +59,7 @@ export default function HomePage() {
                snapshot.docs.map((doc) => ({
                   ...(doc.data() as Deck),
                   id: doc.id,
-               }))
+               })).sort((a, b) => a.name.localeCompare(b.name))
             );
             setIsLoading(false);
          },
@@ -86,7 +86,7 @@ export default function HomePage() {
                         }}
                         className={styles.DeckLink}
                         style={{ flex: 1 }}
-                     >{`${deck.id}: ${deck.name}`}</button>
+                     >{`${deck.name}`}</button>
 
                      {/* Row Buttons */}
                      <div className={styles.RowButtonsDiv}>
